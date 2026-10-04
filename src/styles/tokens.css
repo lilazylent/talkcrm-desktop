@@ -1,0 +1,86 @@
+/* TalkCRM design tokens. Every colour, size and duration in the UI comes from here. */
+:root{
+  --font-sans:'Onest Variable','Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono Variable',ui-monospace,'Cascadia Mono',Consolas,monospace;
+
+  /* type scale — 15px body, nothing below 12px */
+  --fs-micro:12px;--fs-meta:13px;--fs-small:14px;--fs-body:15px;--fs-lead:16px;
+  --fs-h3:17px;--fs-h2:20px;--fs-h1:28px;--fs-display:34px;
+  --lh-tight:1.2;--lh-snug:1.35;--lh-body:1.55;
+  --fw-regular:420;--fw-medium:520;--fw-semibold:620;--fw-bold:720;
+
+  /* 4px base, 8px rhythm */
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:20px;--s-6:24px;--s-7:32px;--s-8:40px;--s-9:48px;--s-10:64px;
+  --r-xs:6px;--r-sm:8px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:999px;
+
+  --sidebar-w:264px;--sidebar-w-collapsed:76px;--topbar-h:56px;--page-max:1360px;--gutter:24px;
+  --control-h:40px;--control-h-sm:32px;--control-h-lg:48px;
+
+  --ease:cubic-bezier(.2,.8,.2,1);--t-fast:120ms;--t-base:200ms;--t-slow:320ms;
+
+  /* brand */
+  --brand-1:#5b5cf0;--brand-2:#7c4dff;--brand-3:#15c5e6;
+  --brand-grad:linear-gradient(135deg,#5b5cf0 0%,#7c4dff 52%,#15c5e6 100%);
+
+  /* sidebar is always ink, in both themes */
+  --ink-0:#070b16;--ink-1:#0c1222;--ink-2:#141b2f;--ink-3:#1e2740;--ink-line:rgba(255,255,255,.07);
+  --ink-text:#e9edf7;--ink-text-2:#a4adc4;--ink-text-3:#808aa5;--danger-solid:#d02f35;
+
+  color-scheme:light;
+  --bg:#f3f5fa;--bg-grid:rgba(91,92,240,.07);
+  --surface:#ffffff;--surface-2:#f8f9fc;--surface-3:#eff2f8;--surface-hover:#f4f6fb;
+  --line:#e4e8f0;--line-strong:#d2d8e4;--line-soft:#eef1f6;--line-input:#878fa3;--accent-solid:#5052e8;--accent-solid-hover:#4042d6;
+  --text:#0d1424;--text-2:#465065;--text-3:#646e82;--text-inverse:#ffffff;
+  --accent:#5052e8;--accent-hover:#4042d6;--accent-press:#3436bd;--accent-soft:#eef0ff;--accent-soft-2:#e1e4ff;--accent-text:#3d3fc9;
+  --success:#0e9f62;--on-success:#ffffff;--success-soft:#e6f7ef;--success-text:#06714a;
+  --warning:#e38a00;--warning-soft:#fff4e2;--warning-text:#9a5a00;
+  --danger:#e5484d;--danger-soft:#feeced;--danger-text:#b4232c;
+  --info:#0b93d1;--info-soft:#e5f5fd;--info-text:#03689a;
+  --violet:#8a4dff;--violet-soft:#f2ebff;--violet-text:#6327cf;
+  --focus:0 0 0 3px rgba(80,82,232,.32);
+  --shadow-xs:0 1px 2px rgba(16,24,40,.05);
+  --shadow-sm:0 1px 2px rgba(16,24,40,.04),0 2px 6px rgba(16,24,40,.05);
+  --shadow-md:0 2px 4px rgba(16,24,40,.04),0 10px 24px -6px rgba(16,24,40,.10);
+  --shadow-lg:0 8px 16px -4px rgba(16,24,40,.08),0 28px 56px -12px rgba(16,24,40,.22);
+  --overlay:rgba(9,13,26,.46);
+  --hero-bg:radial-gradient(120% 140% at 100% 0%,rgba(21,197,230,.28) 0%,rgba(21,197,230,0) 42%),radial-gradient(90% 120% at 0% 100%,rgba(124,77,255,.38) 0%,rgba(124,77,255,0) 55%),linear-gradient(135deg,#0d1330 0%,#151c3f 60%,#0e1a35 100%);
+}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#080c18;--bg-grid:rgba(124,140,255,.06);
+  --surface:#0f1526;--surface-2:#131a2e;--surface-3:#1a2238;--surface-hover:#161e34;
+  --line:#1f2840;--line-strong:#2b3654;--line-soft:#182036;--line-input:#5c6886;--accent-solid:#5557ee;--accent-solid-hover:#4a4ce6;
+  --text:#eaeef8;--text-2:#aab3c9;--text-3:#8690a8;
+  --accent:#7476ff;--accent-hover:#8789ff;--accent-press:#6062f0;--accent-soft:rgba(116,118,255,.14);--accent-soft-2:rgba(116,118,255,.24);--accent-text:#a9abff;
+  --success:#2cc985;--on-success:#062015;--success-soft:rgba(44,201,133,.13);--success-text:#5fe0a6;
+  --warning:#f2a43a;--warning-soft:rgba(242,164,58,.14);--warning-text:#f7c072;
+  --danger:#ff6369;--danger-soft:rgba(255,99,105,.14);--danger-text:#ff9599;
+  --info:#38bdf8;--info-soft:rgba(56,189,248,.13);--info-text:#7dd3fc;
+  --violet:#a87bff;--violet-soft:rgba(168,123,255,.15);--violet-text:#c7a8ff;
+  --focus:0 0 0 3px rgba(116,118,255,.45);
+  --shadow-xs:0 1px 2px rgba(0,0,0,.3);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.02);
+  --shadow-lg:0 24px 64px -12px rgba(0,0,0,.65);
+  --overlay:rgba(2,4,10,.66);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#080c18;--bg-grid:rgba(124,140,255,.06);
+  --surface:#0f1526;--surface-2:#131a2e;--surface-3:#1a2238;--surface-hover:#161e34;
+  --line:#1f2840;--line-strong:#2b3654;--line-soft:#182036;--line-input:#5c6886;--accent-solid:#5557ee;--accent-solid-hover:#4a4ce6;
+  --text:#eaeef8;--text-2:#aab3c9;--text-3:#8690a8;
+  --accent:#7476ff;--accent-hover:#8789ff;--accent-press:#6062f0;--accent-soft:rgba(116,118,255,.14);--accent-soft-2:rgba(116,118,255,.24);--accent-text:#a9abff;
+  --success:#2cc985;--on-success:#062015;--success-soft:rgba(44,201,133,.13);--success-text:#5fe0a6;
+  --warning:#f2a43a;--warning-soft:rgba(242,164,58,.14);--warning-text:#f7c072;
+  --danger:#ff6369;--danger-soft:rgba(255,99,105,.14);--danger-text:#ff9599;
+  --info:#38bdf8;--info-soft:rgba(56,189,248,.13);--info-text:#7dd3fc;
+  --violet:#a87bff;--violet-soft:rgba(168,123,255,.15);--violet-text:#c7a8ff;
+  --focus:0 0 0 3px rgba(116,118,255,.45);
+  --shadow-xs:0 1px 2px rgba(0,0,0,.3);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.02);
+  --shadow-lg:0 24px 64px -12px rgba(0,0,0,.65);
+  --overlay:rgba(2,4,10,.66);
+}

@@ -1,0 +1,30 @@
+*,*::before,*::after{box-sizing:border-box}
+html{font-family:var(--font-sans);font-size:var(--fs-body);line-height:var(--lh-body);color:var(--text);background:var(--bg);font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss01'}
+body{margin:0;min-width:1000px;background:var(--bg);color:var(--text);font-weight:var(--fw-regular);overflow:hidden}
+#root{height:100vh}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3{font-weight:var(--fw-bold);letter-spacing:-.018em;line-height:var(--lh-tight);color:var(--text)}
+strong,b{font-weight:var(--fw-semibold)}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+button:disabled{cursor:not-allowed}
+code,kbd,time,.mono{font-family:var(--font-mono);font-feature-settings:normal}
+.num{font-variant-numeric:tabular-nums}
+:focus{outline:none}
+:focus-visible{outline:none;box-shadow:var(--focus);border-radius:var(--r-sm)}
+::selection{background:var(--accent-soft-2)}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:12px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background-color:var(--text-3)}
+::-webkit-scrollbar-track{background:transparent}
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted{color:var(--text-3)}
+.text-2{color:var(--text-2)}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eyebrow{font-family:var(--font-mono);font-size:var(--fs-micro);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.stack{display:flex;flex-direction:column;gap:var(--s-2)}
+.row{display:flex;align-items:center;gap:var(--s-3)}
+.wrap{flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}

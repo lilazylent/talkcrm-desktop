@@ -12,6 +12,7 @@ const api: DesktopApi = {
   updateProfile: displayName => ipcRenderer.invoke('profile:update', displayName),
   setSetting: (key, value) => ipcRenderer.invoke('setting:update', key, value),
   resetDemo: () => ipcRenderer.invoke('demo:reset'),
+  setWindowTheme: dark => ipcRenderer.invoke('window:theme', dark),
   connectCrm: input=>ipcRenderer.invoke('crm:connect',input),
   openCrmBrowser: domain=>ipcRenderer.invoke('crm:browserOpen',domain),
   verifyCrmBrowser: ()=>ipcRenderer.invoke('crm:browserVerify'),

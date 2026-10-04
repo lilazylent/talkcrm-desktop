@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, nativeTheme } from 'electron';
 import {KonturService} from './kontur/service.ts';
 import {TalkSession} from './kontur/session.ts';
 import {sourceRecordingUrl} from './kontur/security.ts';
@@ -38,10 +38,14 @@ const safeHandle = <A extends unknown[]>(channel: string, action: (...args: A) =
   });
 };
 
+// Window chrome follows the renderer theme; colours mirror --bg / --text-2 tokens.
+const windowTheme = (dark: boolean) => ({ background: dark ? '#080c18' : '#f3f5fa', overlay: { color: dark ? '#080c18' : '#f3f5fa', symbolColor: dark ? '#aab3c9' : '#465065', height: 56 } });
+
 async function createWindow(): Promise<void> {
   const window = new BrowserWindow({
     width: 1440, height: 900, minWidth: 1060, minHeight: 700, show: false,
-    backgroundColor: '#f4f6f8', title: 'TalkCRM Desktop',
+    backgroundColor: windowTheme(nativeTheme.shouldUseDarkColors).background, title: 'TalkCRM Desktop',
+    titleBarStyle: 'hidden', titleBarOverlay: windowTheme(nativeTheme.shouldUseDarkColors).overlay,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
   mainWindow=window;
@@ -68,6 +72,7 @@ app.whenReady().then(async () => {
   safeHandle('task:setCompleted', async (id: string, completed: boolean) => { await repository.setTaskCompleted(id, completed); return repository.snapshot(); });
   safeHandle('profile:update', async (name: string) => { await repository.updateProfile(name); return repository.snapshot(); });
   safeHandle('setting:update', async (key: string, value: string) => { await repository.setSetting(key, value); return repository.snapshot(); });
+  safeHandle('window:theme', async (dark: unknown) => { if (typeof dark !== 'boolean' || !mainWindow) return; const theme = windowTheme(dark); mainWindow.setBackgroundColor(theme.background); mainWindow.setTitleBarOverlay(theme.overlay); });
   safeHandle('demo:reset', async () => { await repository.resetDemo(); logger.write('warning', 'Demo data reset'); return repository.snapshot(); });
   safeHandle('crm:connect', input=>crm.connect(input));
   safeHandle('crm:browserOpen', domain=>crm.openBrowser(domain));

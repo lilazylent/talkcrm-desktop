@@ -1,6 +1,6 @@
 # TalkCRM Desktop
 
-TalkCRM Desktop 0.4.0 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
+TalkCRM Desktop 0.4.1 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
 
 amoCRM and its existing read-only integration are preserved. Real and demo data are separate. Phase 4 adds local meeting/client/deal proposals with explanations and mandatory human confirmation. AI generation and CRM write-back remain later work.
 
@@ -67,4 +67,6 @@ The meetings list supports confirmed/review/unlinked filters and batch proposals
 | `tests` | Persistence and critical UI tests |
 | `docs` | Architecture and future phase plan |
 
-See [architecture](docs/ARCHITECTURE.md) and [roadmap](docs/ROADMAP.md).
+See [architecture](docs/ARCHITECTURE.md), [design system](docs/DESIGN_SYSTEM.md) and [roadmap](docs/ROADMAP.md).
+
+Version 0.4.1 is a full interface redesign: new design system (Onest + JetBrains Mono, light/dark themes), frameless native window, dashboard with pipeline, meeting workspace with a sticky CRM-match panel, deals board view and Ctrl+K quick search. Data, integrations and migrations are unchanged.
