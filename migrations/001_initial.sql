@@ -1,0 +1,16 @@
+CREATE TABLE users (id TEXT PRIMARY KEY, display_name TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE clients (id TEXT PRIMARY KEY, external_id TEXT, source TEXT NOT NULL, name TEXT NOT NULL, company_name TEXT, phone TEXT, email TEXT, responsible_name TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE deals (id TEXT PRIMARY KEY, external_id TEXT, client_id TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE, title TEXT NOT NULL, pipeline_name TEXT, stage_name TEXT NOT NULL, responsible_name TEXT, amount REAL, currency TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE meetings (id TEXT PRIMARY KEY, external_id TEXT, deal_id TEXT REFERENCES deals(id) ON DELETE SET NULL, client_id TEXT REFERENCES clients(id) ON DELETE SET NULL, title TEXT NOT NULL, started_at TEXT NOT NULL, duration_seconds INTEGER, participants_json TEXT NOT NULL, summary TEXT, transcript TEXT, recording_url TEXT, matching_status TEXT NOT NULL CHECK (matching_status IN ('linked','review','unlinked')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE tasks (id TEXT PRIMARY KEY, external_id TEXT, deal_id TEXT REFERENCES deals(id) ON DELETE SET NULL, client_id TEXT REFERENCES clients(id) ON DELETE SET NULL, title TEXT NOT NULL, due_at TEXT, completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0,1)), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE integrations (id TEXT PRIMARY KEY, type TEXT NOT NULL UNIQUE, enabled INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL, account_label TEXT, last_sync_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE templates (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, fields_json TEXT NOT NULL);
+CREATE INDEX idx_clients_name ON clients(name);
+CREATE INDEX idx_clients_company ON clients(company_name);
+CREATE INDEX idx_deals_client ON deals(client_id);
+CREATE INDEX idx_deals_stage ON deals(stage_name);
+CREATE INDEX idx_meetings_client_started ON meetings(client_id, started_at DESC);
+CREATE INDEX idx_meetings_deal ON meetings(deal_id);
+CREATE INDEX idx_tasks_due ON tasks(completed, due_at);
+CREATE INDEX idx_tasks_client ON tasks(client_id);

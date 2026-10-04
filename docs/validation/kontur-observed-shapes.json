@@ -1,0 +1,725 @@
+[
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {
+      "start": "{value}",
+      "end": "{value}"
+    },
+    "path": "/api/calendar",
+    "status": 200,
+    "query": [
+      "start",
+      "end"
+    ],
+    "shape": {
+      "items": {
+        "array": 0,
+        "items": []
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {
+      "take": "{value}"
+    },
+    "path": "/api/recordings/externalUpload/history",
+    "status": 200,
+    "query": [
+      "take"
+    ],
+    "shape": {
+      "entities": {
+        "array": 0,
+        "items": []
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {
+      "skip": "{value}",
+      "top": "{value}",
+      "initiator": "false"
+    },
+    "path": "/api/recordings",
+    "status": 200,
+    "query": [
+      "skip",
+      "top",
+      "initiator"
+    ],
+    "shape": {
+      "recordings": {
+        "array": 4,
+        "items": [
+          {
+            "id": "string",
+            "title": "string",
+            "description": "string",
+            "previewImage": {
+              "fileUrl": "string",
+              "size": {}
+            },
+            "createdDate": "string",
+            "createdBy": {
+              "login": "string",
+              "hasEmail": "boolean",
+              "firstname": "string",
+              "surname": "string",
+              "patronymic": "string",
+              "key": "string",
+              "avatarUrl": "string",
+              "avatarInfo": {
+                "width": "number",
+                "height": "number",
+                "face": {
+                  "x": "number",
+                  "y": "number",
+                  "width": "number",
+                  "height": "number"
+                }
+              }
+            },
+            "duration": "number",
+            "status": {
+              "enum": "complete"
+            },
+            "frameSize": {
+              "width": "number",
+              "height": "number"
+            },
+            "participants": {
+              "array": 5,
+              "items": [
+                {
+                  "userInfo": {
+                    "login": "string",
+                    "hasEmail": "boolean",
+                    "firstname": "string",
+                    "surname": "string",
+                    "patronymic": "string",
+                    "key": "string",
+                    "avatarUrl": "string",
+                    "avatarInfo": {
+                      "width": "number",
+                      "height": "number",
+                      "face": {
+                        "x": "number",
+                        "y": "number",
+                        "width": "number",
+                        "height": "number"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "participantsCount": "number",
+            "hasAudioRecord": "boolean",
+            "qualities": {
+              "array": 2,
+              "items": [
+                {
+                  "status": {
+                    "enum": "complete"
+                  },
+                  "progress": "number",
+                  "fileUrl": "string",
+                  "size": {
+                    "width": "number",
+                    "height": "number"
+                  },
+                  "name": "string"
+                }
+              ]
+            },
+            "transcription": {
+              "transcriptionUrl": "string",
+              "status": {
+                "enum": "complete"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "path": "/api/recordings/{id}",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "id": "string",
+      "title": "string",
+      "description": "string",
+      "previewImage": {
+        "fileUrl": "string",
+        "size": {}
+      },
+      "createdDate": "string",
+      "createdBy": {
+        "login": "string",
+        "hasEmail": "boolean",
+        "firstname": "string",
+        "surname": "string",
+        "key": "string",
+        "post": "string",
+        "avatarUrl": "string",
+        "hasMobilePhone": "boolean"
+      },
+      "duration": "number",
+      "status": {
+        "enum": "complete"
+      },
+      "frameSize": {
+        "width": "number",
+        "height": "number"
+      },
+      "participants": {
+        "array": 8,
+        "items": [
+          {
+            "userInfo": {
+              "login": "string",
+              "hasEmail": "boolean",
+              "firstname": "string",
+              "surname": "string",
+              "key": "string",
+              "post": "string",
+              "avatarUrl": "string",
+              "profileUrl": "string"
+            }
+          }
+        ]
+      },
+      "participantsCount": "number",
+      "hasAudioRecord": "boolean",
+      "qualities": {
+        "array": 2,
+        "items": [
+          {
+            "status": {
+              "enum": "complete"
+            },
+            "progress": "number",
+            "fileUrl": "string",
+            "size": {
+              "width": "number",
+              "height": "number"
+            },
+            "name": "string"
+          }
+        ]
+      },
+      "transcription": {
+        "transcriptionUrl": "string",
+        "status": {
+          "enum": "complete"
+        }
+      },
+      "conferenceKey": "string",
+      "notesCount": "number"
+    }
+  },
+  {
+    "path": "/api/recordings/{id}/access",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "userAccesses": {
+        "array": 6,
+        "items": [
+          {
+            "user": {
+              "login": "string",
+              "hasEmail": "boolean",
+              "firstname": "string",
+              "surname": "string",
+              "key": "string",
+              "post": "string",
+              "avatarUrl": "string",
+              "hasMobilePhone": "boolean"
+            },
+            "roleId": "string"
+          }
+        ]
+      },
+      "linkAccess": {
+        "scope": "string"
+      }
+    }
+  },
+  {
+    "path": "/api/recordings/v2/{id}/summary",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "transcriptionV2": {
+        "status": {
+          "enum": "success"
+        },
+        "tracks": {
+          "array": 8,
+          "items": [
+            {
+              "trackId": "string",
+              "speaker": {
+                "userInfo": {
+                  "login": "string",
+                  "hasEmail": "boolean",
+                  "firstname": "string",
+                  "surname": "string",
+                  "patronymic": "string",
+                  "key": "string"
+                }
+              },
+              "chunks": {
+                "array": 5,
+                "items": [
+                  {
+                    "chunkId": "string",
+                    "timeOffsetInMillis": "number",
+                    "startTimeOffsetInMillis": "number",
+                    "endTimeOffsetInMillis": "number",
+                    "text": "string",
+                    "words": {
+                      "array": 3,
+                      "items": [
+                        {
+                          "startTimeOffsetInMillis": "number",
+                          "endTimeOffsetInMillis": "number",
+                          "text": "string"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "confidence": "number"
+            }
+          ]
+        },
+        "errors": {
+          "array": 0,
+          "items": []
+        },
+        "transcriptId": "string"
+      },
+      "shortSummaryV2": {
+        "summaryId": "string",
+        "status": {
+          "enum": "success"
+        },
+        "startedAt": "string",
+        "chunks": {
+          "array": 11,
+          "items": [
+            {
+              "type": "string",
+              "timestamp": "number",
+              "version": "number",
+              "text": "string"
+            }
+          ]
+        },
+        "canChangeVisibility": "boolean"
+      },
+      "protocolV2": {
+        "status": {
+          "enum": "notAvailable"
+        }
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/context",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "user": {
+        "email": "string",
+        "login": "string",
+        "hasEmail": "boolean",
+        "firstname": "string",
+        "surname": "string",
+        "patronymic": "string",
+        "roles": {
+          "array": 0,
+          "items": []
+        },
+        "roleInfos": {
+          "array": 0,
+          "items": []
+        },
+        "key": "string"
+      },
+      "permissions": {
+        "array": 6,
+        "items": [
+          "string"
+        ]
+      },
+      "domain": {
+        "authInfo": {
+          "type": "string",
+          "oidcAuthority": "string",
+          "oidcClientId": "string",
+          "oidcScope": "string",
+          "useBrowserAppAuth": "boolean",
+          "isDefaultAuthority": "boolean"
+        },
+        "features": {
+          "aiAssistant": {
+            "enabled": "boolean"
+          },
+          "calendars": {
+            "calendarType": "string",
+            "enabled": "boolean",
+            "isEditable": "boolean",
+            "supportsRecurrenceEvents": "boolean",
+            "enableExternalCalendars": "boolean",
+            "detectCustomExternalVcs": "boolean",
+            "maxCustomExternalVcsCount": {
+              "limit": "number"
+            }
+          },
+          "conferencing": {
+            "enabled": "boolean",
+            "maxConferenceUsersCount": "number",
+            "maxConferencesCount": "number",
+            "preferredVideoCodec": "string",
+            "enableRemoteControl": "boolean",
+            "enableCalls": "boolean",
+            "enableCustomVirtualBackgrounds": "boolean",
+            "feedbackWhenLeaving": "boolean",
+            "enableMultiScreenSharing": "boolean",
+            "enableSessionHalls": "boolean",
+            "enableAnonymousDisabling": "boolean",
+            "enableAnonymousRoomAccessExpiresReminder": "boolean",
+            "enablePolls": "boolean",
+            "enableExternalStreaming": "boolean",
+            "enable4K": "boolean",
+            "enable4KScreenSharing": "boolean",
+            "restrictFreeConferencesDuration": "boolean"
+          },
+          "recording": {
+            "maxDurationMinutes": "number",
+            "maxThreadCount": "number",
+            "enabled": "boolean",
+            "enableAutoMeetingRecording": "boolean",
+            "enableCloudRecording": "boolean"
+          },
+          "transcribing": {
+            "enabled": "boolean",
+            "summarization": {
+              "enabled": "boolean"
+            }
+          },
+          "sip": {
+            "enabled": "boolean",
+            "enableIncomingCall": "boolean"
+          },
+          "chat": {
+            "enabled": "boolean",
+            "allowAttachments": "boolean",
+            "messengerIntegrationEnabled": "boolean"
+          },
+          "applications": {
+            "enabled": "boolean"
+          },
+          "routing": {
+            "enabled": "boolean"
+          },
+          "messenger": {
+            "enabled": "boolean",
+            "selectedProd": "string",
+            "guestAccessLicenseCount": "number"
+          },
+          "billing": {
+            "enabled": "boolean"
+          },
+          "whiteboard": {
+            "enabled": "boolean",
+            "accessLevel": "string",
+            "licenseCount": "number"
+          },
+          "corpTelephony": {},
+          "changeDomainName": {
+            "enabled": "boolean",
+            "maxDomainAddresses": "number"
+          },
+          "domainReport": {
+            "enabled": "boolean"
+          },
+          "personalCustomVirtualBackgrounds": {
+            "enabled": "boolean"
+          },
+          "nativeMobileConferencing": {
+            "noiseSuppressionEnabled": "boolean"
+          },
+          "nativeMobileChats": {},
+          "notes": {
+            "enabled": "boolean"
+          },
+          "neuralNetworkVirtualBackgrounds": {
+            "enabled": "boolean"
+          },
+          "beautification": {
+            "enabled": "boolean"
+          },
+          "federations": {
+            "enabled": "boolean",
+            "accessLevel": "string"
+          },
+          "userAttributes": {
+            "enabled": "boolean"
+          },
+          "presentations": {
+            "enabled": "boolean"
+          },
+          "timer": {
+            "enabled": "boolean"
+          },
+          "onboarding": {
+            "enabled": "boolean"
+          },
+          "agenda": {
+            "enabled": "boolean"
+          },
+          "webhooks": {
+            "webhooksCount": "number"
+          },
+          "topics": {
+            "enabled": "boolean",
+            "suggestion": {
+              "enabled": "boolean"
+            }
+          },
+          "externalUploadFiles": {
+            "enabled": "boolean"
+          },
+          "customAi": {},
+          "usersGroups": {
+            "enabled": "boolean"
+          },
+          "anonymousAccessExpiresNotification": {}
+        },
+        "csiLinks": {
+          "array": 0,
+          "items": []
+        },
+        "editableUserProperties": {
+          "array": 10,
+          "items": [
+            "string"
+          ]
+        },
+        "defaultRoomModeratorType": "string",
+        "enableRoleModel": "boolean",
+        "enablePermissions": "boolean",
+        "experiments": {
+          "array": 10,
+          "items": [
+            "string"
+          ]
+        },
+        "customSettings": {},
+        "friendlyName": "string",
+        "title": "string",
+        "editableUserProfile": "boolean",
+        "accessByEmail": "boolean",
+        "tariffValidUntil": "string"
+      },
+      "billing": {
+        "streamBillingInfo": {
+          "canActivateStreamTrial": "boolean",
+          "broadcast": {
+            "tariffType": "string"
+          },
+          "webinar": {
+            "tariffType": "string"
+          }
+        },
+        "messengerBillingInfo": {
+          "tariffType": "string"
+        },
+        "tariffType": "string",
+        "lastSubscription": {
+          "beginDate": "string",
+          "endDate": "string",
+          "tariff": {
+            "namedId": "string",
+            "tariffId": "string"
+          },
+          "state": "string",
+          "subscriptionId": "string",
+          "period": "string"
+        },
+        "currentSubscription": {
+          "beginDate": "string",
+          "endDate": "string",
+          "tariff": {
+            "namedId": "string",
+            "tariffId": "string"
+          },
+          "state": "string",
+          "subscriptionId": "string",
+          "period": "string"
+        }
+      },
+      "environment": {
+        "pushPublicKey": "string",
+        "productBackendVersion": "string",
+        "streamAppBaseUrl": "string",
+        "streamCanBeStarted": "boolean",
+        "presentationsDeployed": "boolean",
+        "messengerAppBaseUrl": "string",
+        "messengerProxyUrl": "string",
+        "kStore": {
+          "url": "string",
+          "saleScenarioId": "string",
+          "prolongScenarioId": "string",
+          "productId": "string",
+          "kStoreProductConfigurations": {
+            "array": 3,
+            "items": [
+              {
+                "talkProduct": "string",
+                "saleScenarioId": "string",
+                "prolongScenarioId": "string",
+                "addFunctionalityScenarioId": "string",
+                "upgradeScenarioId": "string",
+                "productId": "string"
+              }
+            ]
+          }
+        },
+        "sipAdapterUrl": "string",
+        "simultaneousTranslationPublicKey": "string"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/favoriterooms",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "userFavoriteRooms": {
+        "array": 0,
+        "items": []
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/banners/user",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "banners": {
+        "array": 0,
+        "items": []
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/Onboardings/talk/user",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "onboardings": {
+        "array": 0,
+        "items": []
+      },
+      "tours": {
+        "array": 0,
+        "items": []
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/conferencesHistory/recent",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "array": 4,
+      "items": [
+        {
+          "conference": {
+            "artifacts": {
+              "invitedParticipants": {
+                "array": 0,
+                "items": []
+              },
+              "content": {
+                "array": 1,
+                "items": [
+                  {
+                    "type": "string",
+                    "id": "string"
+                  }
+                ]
+              },
+              "chatChannelHasMessages": {
+                "general": "boolean"
+              }
+            },
+            "sessionHallsArtifacts": {},
+            "key": "string",
+            "roomName": "string",
+            "startTime": "string",
+            "endTime": "string",
+            "title": "string"
+          },
+          "room": {
+            "onlineUsers": {
+              "array": 0,
+              "items": []
+            },
+            "roomName": "string",
+            "title": "string",
+            "allowAnonymous": "boolean",
+            "pinCode": "string"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "auth": "Authorization: Session",
+    "queryValues": {},
+    "path": "/api/vocWidget/config",
+    "status": 200,
+    "query": [],
+    "shape": {
+      "widgetUrl": "string",
+      "apiUrl": "string",
+      "authUrl": "string",
+      "formsWidgetUrl": "string",
+      "otelGateUrl": "string",
+      "metrikaOrigin": "string",
+      "fingerprintOrigin": "string",
+      "authProxyApiUrl": "string",
+      "env": "string"
+    }
+  }
+]

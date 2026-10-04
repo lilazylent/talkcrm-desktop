@@ -1,0 +1,38 @@
+{
+  "version": "0.4.0",
+  "preserved": {
+    "users": true,
+    "clients": true,
+    "deals": true,
+    "meetings": true,
+    "tasks": true,
+    "integrations": true,
+    "app_settings": true,
+    "templates": true,
+    "crm_accounts": true,
+    "crm_entities": true,
+    "crm_relations": true,
+    "crm_fields": true,
+    "sync_runs": true,
+    "kontur_accounts": true,
+    "meeting_source_ids": true,
+    "meeting_participants": true,
+    "meeting_artifacts": true,
+    "transcript_segments": true,
+    "integration_sync_runs": true
+  },
+  "migrations": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "counts": {
+    "meetings": 3,
+    "recordings": 4,
+    "segments": 891,
+    "retellings": 4,
+    "confirmed": 0
+  }
+}

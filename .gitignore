@@ -1,0 +1,17 @@
+node_modules/
+dist-web/
+dist-electron/
+release/
+.tmp/
+*.log
+public/kontur-preview.json
+docs/validation/kontur-installed.png
+
+public/matching-preview.json
+docs/validation/matching-real.json
+docs/validation/matching-installed.png
+
+*.sqlite
+*.sqlite-journal
+*.credential
+.claude/settings.local.json

@@ -1,0 +1,9 @@
+{
+  "platform": "win32",
+  "roundTrip": true,
+  "hostOnly": true,
+  "httpOnly": true,
+  "secure": true,
+  "plaintextOnDisk": false,
+  "networkRequests": 0
+}

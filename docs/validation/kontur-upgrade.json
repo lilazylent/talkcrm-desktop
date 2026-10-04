@@ -1,0 +1,25 @@
+{
+  "tablePreserved": {
+    "users": true,
+    "clients": true,
+    "deals": true,
+    "tasks": true,
+    "templates": true,
+    "integrations": true,
+    "crm_accounts": true,
+    "crm_entities": true,
+    "crm_fields": true,
+    "crm_relations": true,
+    "sync_runs": true
+  },
+  "originalMeetingsPreserved": true,
+  "settingsPreserved": true,
+  "migrations": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "importedMeetings": 3,
+  "segments": 891
+}

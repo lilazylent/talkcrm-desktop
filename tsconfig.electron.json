@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022"], "module": "NodeNext", "moduleResolution": "NodeNext",
+    "strict": true, "noUnusedLocals": true, "noUnusedParameters": true, "skipLibCheck": true,
+    "types": ["node"], "allowImportingTsExtensions": true, "noEmit": true
+  },
+  "include": ["electron", "src/domain", "src/services/contracts.ts"]
+}

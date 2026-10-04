@@ -1,0 +1,19 @@
+export type MatchingStatus = 'linked' | 'review' | 'unlinked';
+
+export interface UserProfile { id: string; displayName: string; createdAt: string; updatedAt: string }
+export interface Client { primaryContactId?:number|null; companyId?:number|null; availability?:string; id: string; externalId: string | null; source: string; name: string; companyName: string | null; phone: string | null; email: string | null; responsibleName: string | null; createdAt: string; updatedAt: string }
+export interface Deal { source?:string; pipelineId?:number; statusId?:number; availability?:string; lastSeenAt?:string; closedAt?:string|null; id: string; externalId: string | null; clientId: string; title: string; pipelineName: string | null; stageName: string; responsibleName: string | null; amount: number | null; currency: string | null; createdAt: string; updatedAt: string }
+export interface Meeting { crmLink?:import("./matching.ts").MeetingCrmLink; sourceSummaryPreview?:string|null; id: string; externalId: string | null; dealId: string | null; clientId: string | null; title: string; startedAt: string; durationSeconds: number | null; participants: string[]; summary: string | null; transcript: TranscriptLine[]; recordingUrl: string | null; matchingStatus: MatchingStatus; createdAt: string; updatedAt: string; source?:'demo'|'kontur_talk'; integrationMode?:import('./kontur.ts').KonturMode; externalMeetingId?:string|null; externalRecordingId?:string|null; endedAt?:string|null; organizer?:string|null; sourceCreatedAt?:string|null; sourceUpdatedAt?:string|null; lastSeenAt?:string|null; synchronizedAt?:string|null; processingStatus?:import('./kontur.ts').ArtifactState; artifactStates?:Partial<Record<import('./kontur.ts').ArtifactType,import('./kontur.ts').ArtifactState>> }
+export interface TranscriptLine { time: string; speaker: string; text: string }
+export interface Task { id: string; externalId: string | null; source?: string; dealId: string | null; clientId: string | null; title: string; dueAt: string | null; completed: boolean; createdAt: string; updatedAt: string }
+export interface Integration { id: string; type: string; enabled: boolean; status: string; accountLabel: string | null; lastSyncAt: string | null; createdAt: string; updatedAt: string }
+export interface TemplateField { key: string; title: string }
+export interface CrmTemplate { id: string; title: string; description: string; fields: TemplateField[] }
+export interface AppSnapshot { profile: UserProfile; clients: Client[]; deals: Deal[]; meetings: Meeting[]; tasks: Task[]; integrations: Integration[]; settings: Record<string, string>; templates: CrmTemplate[]; version: string; databaseLocation: string; crm?: import('./crm.ts').CrmCache; kontur?:import('./kontur.ts').KonturAccount|null }
+
+export const activeDeal = (deal: Deal): boolean => !deal.closedAt && deal.statusId !== 142 && deal.statusId !== 143 && !['Успешно реализовано', 'Закрыта и не реализована'].includes(deal.stageName);
+export const matchingLabel = (status: MatchingStatus): string => ({ linked: 'Привязана', review: 'Нужно проверить', unlinked: 'Не привязана' })[status];
+export const formatMoney = (amount: number | null, currency: string | null): string => amount === null ? '—' : new Intl.NumberFormat('ru-RU').format(amount) + ' ' + (currency === 'RUB' ? '₽' : currency ?? '');
+export const formatDate = (iso: string | null): string => iso ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso)) : 'Без срока';
+export const formatDuration = (seconds: number | null): string => seconds === null ? '—' : `${Math.round(seconds / 60)} мин`;
+export const dayKey = (iso: string): string => { const d = new Date(iso); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };

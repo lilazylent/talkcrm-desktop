@@ -1,0 +1,100 @@
+{
+  "preserved": true,
+  "before": {
+    "migrations": [
+      [
+        1
+      ],
+      [
+        2
+      ]
+    ],
+    "profile": [
+      [
+        "user-1",
+        "Алексей Смирнов",
+        "2026-10-03T14:26:47.198Z",
+        "2026-10-03T14:26:47.198Z"
+      ]
+    ],
+    "settings": [
+      [
+        "data_mode",
+        "demo"
+      ],
+      [
+        "demo_mode",
+        "on"
+      ],
+      [
+        "demo_seed_version",
+        "1"
+      ],
+      [
+        "notifications",
+        "on"
+      ]
+    ],
+    "counts": {
+      "clients": 8,
+      "deals": 10,
+      "meetings": 8,
+      "tasks": 10,
+      "templates": 2,
+      "crm_accounts": 0,
+      "crm_entities": 0,
+      "crm_fields": 0,
+      "crm_relations": 0
+    }
+  },
+  "after": {
+    "migrations": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ]
+    ],
+    "profile": [
+      [
+        "user-1",
+        "Алексей Смирнов",
+        "2026-10-03T14:26:47.198Z",
+        "2026-10-03T14:26:47.198Z"
+      ]
+    ],
+    "settings": [
+      [
+        "data_mode",
+        "demo"
+      ],
+      [
+        "demo_mode",
+        "on"
+      ],
+      [
+        "demo_seed_version",
+        "1"
+      ],
+      [
+        "notifications",
+        "on"
+      ]
+    ],
+    "counts": {
+      "clients": 8,
+      "deals": 10,
+      "meetings": 8,
+      "tasks": 10,
+      "templates": 2,
+      "crm_accounts": 0,
+      "crm_entities": 0,
+      "crm_fields": 0,
+      "crm_relations": 0
+    }
+  }
+}

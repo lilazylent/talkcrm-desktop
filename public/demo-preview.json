@@ -1,0 +1,796 @@
+{
+  "profile": {
+    "id": "user-1",
+    "displayName": "Алексей Смирнов",
+    "createdAt": "2026-10-03T19:21:53.295Z",
+    "updatedAt": "2026-10-03T19:21:53.295Z"
+  },
+  "clients": [
+    {
+      "id": "c3",
+      "externalId": null,
+      "source": "demo",
+      "name": "Елена Белова",
+      "companyName": "Альфа Логистика",
+      "phone": "+7 900 000-11-23",
+      "email": "elena@alfa.example",
+      "responsibleName": "Мария Петрова",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c5",
+      "externalId": null,
+      "source": "demo",
+      "name": "Анна Корнеева",
+      "companyName": "Бюро Линия",
+      "phone": "+7 900 000-11-25",
+      "email": "anna@line.example",
+      "responsibleName": "Алексей Смирнов",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c8",
+      "externalId": null,
+      "source": "demo",
+      "name": "Дмитрий Соколов",
+      "companyName": "Городские решения",
+      "phone": "+7 900 000-11-28",
+      "email": "dmitry@city.example",
+      "responsibleName": "Мария Петрова",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c7",
+      "externalId": null,
+      "source": "demo",
+      "name": "Ольга Миронова",
+      "companyName": "Клиника Баланс",
+      "phone": "+7 900 000-11-27",
+      "email": "olga@balance.example",
+      "responsibleName": "Алексей Смирнов",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c1",
+      "externalId": null,
+      "source": "demo",
+      "name": "Ирина Волкова",
+      "companyName": "ООО Север",
+      "phone": "+7 900 000-11-21",
+      "email": "irina@sever.example",
+      "responsibleName": "Алексей Смирнов",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c2",
+      "externalId": null,
+      "source": "demo",
+      "name": "Максим Орлов",
+      "companyName": "Студия Маяк",
+      "phone": "+7 900 000-11-22",
+      "email": "max@mayak.example",
+      "responsibleName": "Алексей Смирнов",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c4",
+      "externalId": null,
+      "source": "demo",
+      "name": "Павел Климов",
+      "companyName": "ТехПром",
+      "phone": "+7 900 000-11-24",
+      "email": "pavel@techprom.example",
+      "responsibleName": "Мария Петрова",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "c6",
+      "externalId": null,
+      "source": "demo",
+      "name": "Сергей Лебедев",
+      "companyName": "Ферма Родник",
+      "phone": "+7 900 000-11-26",
+      "email": "sergey@rodnik.example",
+      "responsibleName": "Мария Петрова",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    }
+  ],
+  "deals": [
+    {
+      "id": "d1",
+      "externalId": null,
+      "clientId": "c1",
+      "title": "Внедрение CRM для отдела продаж",
+      "pipelineName": "Основные продажи",
+      "stageName": "Переговоры",
+      "responsibleName": "Алексей Смирнов",
+      "amount": 780000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d10",
+      "externalId": null,
+      "clientId": "c3",
+      "title": "Настройка отчётности",
+      "pipelineName": "Основные продажи",
+      "stageName": "Успешно реализовано",
+      "responsibleName": "Мария Петрова",
+      "amount": 210000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d2",
+      "externalId": null,
+      "clientId": "c2",
+      "title": "Автоматизация заявок",
+      "pipelineName": "Основные продажи",
+      "stageName": "Согласование",
+      "responsibleName": "Алексей Смирнов",
+      "amount": 420000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d3",
+      "externalId": null,
+      "clientId": "c3",
+      "title": "Единая воронка продаж",
+      "pipelineName": "Основные продажи",
+      "stageName": "Квалификация",
+      "responsibleName": "Мария Петрова",
+      "amount": 960000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d4",
+      "externalId": null,
+      "clientId": "c4",
+      "title": "Пилот аналитики",
+      "pipelineName": "Основные продажи",
+      "stageName": "Переговоры",
+      "responsibleName": "Мария Петрова",
+      "amount": 315000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d5",
+      "externalId": null,
+      "clientId": "c5",
+      "title": "CRM для проектной команды",
+      "pipelineName": "Основные продажи",
+      "stageName": "Новый запрос",
+      "responsibleName": "Алексей Смирнов",
+      "amount": 280000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d6",
+      "externalId": null,
+      "clientId": "c6",
+      "title": "Автоматизация повторных продаж",
+      "pipelineName": "Основные продажи",
+      "stageName": "Согласование",
+      "responsibleName": "Мария Петрова",
+      "amount": 530000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d7",
+      "externalId": null,
+      "clientId": "c7",
+      "title": "Клиентский сервис",
+      "pipelineName": "Основные продажи",
+      "stageName": "Переговоры",
+      "responsibleName": "Алексей Смирнов",
+      "amount": 650000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d8",
+      "externalId": null,
+      "clientId": "c8",
+      "title": "Интеграция обращений",
+      "pipelineName": "Основные продажи",
+      "stageName": "Квалификация",
+      "responsibleName": "Мария Петрова",
+      "amount": 390000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "d9",
+      "externalId": null,
+      "clientId": "c1",
+      "title": "Дополнительные лицензии",
+      "pipelineName": "Основные продажи",
+      "stageName": "Новый запрос",
+      "responsibleName": "Алексей Смирнов",
+      "amount": 120000,
+      "currency": "RUB",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    }
+  ],
+  "meetings": [
+    {
+      "id": "m2",
+      "externalId": null,
+      "dealId": "d2",
+      "clientId": "c2",
+      "title": "Демонстрация рабочего пространства",
+      "startedAt": "2026-10-03T11:00:00.000Z",
+      "durationSeconds": 2220,
+      "participants": [
+        "Алексей Смирнов",
+        "Максим Орлов"
+      ],
+      "summary": "Показали карточку клиента и задачи. Отправить презентацию и примеры сценариев.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Максим Орлов",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Максим Орлов",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m1",
+      "externalId": null,
+      "dealId": "d1",
+      "clientId": "c1",
+      "title": "Обсуждение внедрения CRM",
+      "startedAt": "2026-10-02T11:00:00.000Z",
+      "durationSeconds": 2580,
+      "participants": [
+        "Алексей Смирнов",
+        "Ирина Волкова"
+      ],
+      "summary": "Согласовали пилот на отдел продаж. Клиент ждёт план внедрения и расчёт стоимости.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Ирина Волкова",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Ирина Волкова",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m8",
+      "externalId": null,
+      "dealId": null,
+      "clientId": null,
+      "title": "Встреча с новым контактом",
+      "startedAt": "2026-10-01T11:00:00.000Z",
+      "durationSeconds": 1320,
+      "participants": [
+        "Алексей Смирнов",
+        "Новый контакт"
+      ],
+      "summary": "Контакт оставил запрос на демонстрацию. Требуется найти клиента и сделку.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Клиент",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Клиент",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "unlinked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m3",
+      "externalId": null,
+      "dealId": "d3",
+      "clientId": "c3",
+      "title": "Первичная встреча с Альфа Логистика",
+      "startedAt": "2026-09-30T11:00:00.000Z",
+      "durationSeconds": 3060,
+      "participants": [
+        "Алексей Смирнов",
+        "Елена Белова"
+      ],
+      "summary": "Обсудили единую воронку и отчётность. Нужно подтвердить привязку к сделке.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Елена Белова",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Елена Белова",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "review",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m4",
+      "externalId": null,
+      "dealId": "d4",
+      "clientId": "c4",
+      "title": "Пилот: цели и критерии",
+      "startedAt": "2026-09-28T11:00:00.000Z",
+      "durationSeconds": 1740,
+      "participants": [
+        "Алексей Смирнов",
+        "Павел Климов"
+      ],
+      "summary": "Зафиксировали критерии успешного пилота и состав участников.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Павел Климов",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Павел Климов",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m5",
+      "externalId": null,
+      "dealId": "d5",
+      "clientId": "c5",
+      "title": "Знакомство с командой",
+      "startedAt": "2026-09-27T11:00:00.000Z",
+      "durationSeconds": 2040,
+      "participants": [
+        "Алексей Смирнов",
+        "Анна Корнеева"
+      ],
+      "summary": "Команда ищет простой процесс для проектов и заявок.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Анна Корнеева",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Анна Корнеева",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m6",
+      "externalId": null,
+      "dealId": "d6",
+      "clientId": "c6",
+      "title": "Повторная встреча по бюджету",
+      "startedAt": "2026-09-25T11:00:00.000Z",
+      "durationSeconds": 2760,
+      "participants": [
+        "Алексей Смирнов",
+        "Сергей Лебедев"
+      ],
+      "summary": "Обсудили бюджет на квартал и этапы запуска.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Сергей Лебедев",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Сергей Лебедев",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "m7",
+      "externalId": null,
+      "dealId": "d7",
+      "clientId": "c7",
+      "title": "Сервис для клиентов клиники",
+      "startedAt": "2026-09-23T11:00:00.000Z",
+      "durationSeconds": 2340,
+      "participants": [
+        "Алексей Смирнов",
+        "Ольга Миронова"
+      ],
+      "summary": "Нужны напоминания, история обращений и единый профиль клиента.",
+      "transcript": [
+        {
+          "time": "00:42",
+          "speaker": "Алексей",
+          "text": "Расскажите, как сейчас устроен процесс и что хотелось бы изменить."
+        },
+        {
+          "time": "01:08",
+          "speaker": "Ольга Миронова",
+          "text": "Сейчас заявки ведутся в таблицах. Хотим видеть общую картину по клиентам и не терять договорённости."
+        },
+        {
+          "time": "03:16",
+          "speaker": "Алексей",
+          "text": "Какие команды будут работать в системе и когда планируете запуск?"
+        },
+        {
+          "time": "04:02",
+          "speaker": "Ольга Миронова",
+          "text": "Начнём с отдела продаж. Решение хотим принять в этом месяце."
+        }
+      ],
+      "recordingUrl": null,
+      "matchingStatus": "linked",
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t7",
+      "externalId": null,
+      "dealId": "d7",
+      "clientId": "c7",
+      "title": "Отправить схему клиентского пути",
+      "dueAt": "2026-10-01T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t1",
+      "externalId": null,
+      "dealId": "d1",
+      "clientId": "c1",
+      "title": "Отправить план внедрения",
+      "dueAt": "2026-10-02T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t2",
+      "externalId": null,
+      "dealId": "d2",
+      "clientId": "c2",
+      "title": "Выслать презентацию и кейсы",
+      "dueAt": "2026-10-03T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t3",
+      "externalId": null,
+      "dealId": "d3",
+      "clientId": "c3",
+      "title": "Уточнить состав команды",
+      "dueAt": "2026-10-03T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t4",
+      "externalId": null,
+      "dealId": "d4",
+      "clientId": "c4",
+      "title": "Подготовить критерии пилота",
+      "dueAt": "2026-10-04T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t5",
+      "externalId": null,
+      "dealId": "d5",
+      "clientId": "c5",
+      "title": "Согласовать демонстрацию",
+      "dueAt": "2026-10-05T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t6",
+      "externalId": null,
+      "dealId": "d6",
+      "clientId": "c6",
+      "title": "Обновить коммерческое предложение",
+      "dueAt": "2026-10-06T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t8",
+      "externalId": null,
+      "dealId": "d8",
+      "clientId": "c8",
+      "title": "Позвонить Дмитрию",
+      "dueAt": "2026-10-07T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t9",
+      "externalId": null,
+      "dealId": "d1",
+      "clientId": "c1",
+      "title": "Назначить техническую встречу",
+      "dueAt": "2026-10-08T13:00:00.000Z",
+      "completed": false,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "t10",
+      "externalId": null,
+      "dealId": "d10",
+      "clientId": "c3",
+      "title": "Поблагодарить за встречу",
+      "dueAt": "2026-09-29T13:00:00.000Z",
+      "completed": true,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    }
+  ],
+  "integrations": [
+    {
+      "id": "amo",
+      "type": "amoCRM",
+      "enabled": false,
+      "status": "Не подключено",
+      "accountLabel": null,
+      "lastSyncAt": null,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "talk",
+      "type": "Контур.Толк",
+      "enabled": false,
+      "status": "Не подключено",
+      "accountLabel": null,
+      "lastSyncAt": null,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    },
+    {
+      "id": "ai",
+      "type": "AI",
+      "enabled": false,
+      "status": "Не настроено",
+      "accountLabel": null,
+      "lastSyncAt": null,
+      "createdAt": "2026-10-03T19:21:53.295Z",
+      "updatedAt": "2026-10-03T19:21:53.295Z"
+    }
+  ],
+  "settings": {
+    "data_mode": "demo",
+    "demo_seed_version": "1",
+    "notifications": "on",
+    "demo_mode": "on"
+  },
+  "templates": [
+    {
+      "id": "first",
+      "title": "Первичная встреча",
+      "description": "Собрать контекст и договориться о следующем шаге",
+      "fields": [
+        {
+          "key": "field_1",
+          "title": "Потребность"
+        },
+        {
+          "key": "field_2",
+          "title": "Текущая ситуация"
+        },
+        {
+          "key": "field_3",
+          "title": "Основная проблема"
+        },
+        {
+          "key": "field_4",
+          "title": "ЛПР"
+        },
+        {
+          "key": "field_5",
+          "title": "Бюджет"
+        },
+        {
+          "key": "field_6",
+          "title": "Срок"
+        },
+        {
+          "key": "field_7",
+          "title": "Возражения"
+        },
+        {
+          "key": "field_8",
+          "title": "Договорённости"
+        },
+        {
+          "key": "field_9",
+          "title": "Следующий шаг"
+        }
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "Повторная встреча",
+      "description": "Проверить прогресс и закрепить решения",
+      "fields": [
+        {
+          "key": "field_1",
+          "title": "Итоги прошлого контакта"
+        },
+        {
+          "key": "field_2",
+          "title": "Новые вводные"
+        },
+        {
+          "key": "field_3",
+          "title": "Решение"
+        },
+        {
+          "key": "field_4",
+          "title": "Возражения"
+        },
+        {
+          "key": "field_5",
+          "title": "Договорённости"
+        },
+        {
+          "key": "field_6",
+          "title": "Следующий шаг"
+        }
+      ]
+    }
+  ],
+  "crm": {
+    "account": null,
+    "contacts": [],
+    "companies": [],
+    "pipelines": [],
+    "notes": [],
+    "fields": []
+  },
+  "version": "0.2.0",
+  "databaseLocation": "C:\\Users\\lilaz\\AppData\\Local\\Temp\\talkcrm-preview-XzUAiB\\preview.sqlite"
+}

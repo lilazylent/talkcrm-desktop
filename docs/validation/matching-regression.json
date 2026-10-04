@@ -1,0 +1,20 @@
+{
+  "version": "0.4.0",
+  "stableMeetingIds": true,
+  "stableSegmentIds": true,
+  "realConfirmed": 0,
+  "crm": {
+    "state": "success",
+    "leads": 33,
+    "contacts": 33,
+    "fields": 318
+  },
+  "kontur": {
+    "state": "connected",
+    "meetings": 3,
+    "recordings": 4,
+    "segments": 891,
+    "retellings": 4,
+    "successfulRuns": 5
+  }
+}

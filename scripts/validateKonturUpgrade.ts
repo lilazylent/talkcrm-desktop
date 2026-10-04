@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import initSqlJs from 'sql.js';
+const userData=path.join(process.env.APPDATA!,'TalkCRM Desktop');const SQL=await initSqlJs();
+const before=new SQL.Database(new Uint8Array(fs.readFileSync(path.join(userData,'backups/phase3-20261004/talkcrm-before-0.3.0.sqlite'))));const after=new SQL.Database(new Uint8Array(fs.readFileSync(path.join(userData,'talkcrm.sqlite'))));
+const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');const rows=(db:InstanceType<typeof SQL.Database>,query:string)=>db.exec(query)[0]?.values??[];
+const oldTables=['users','clients','deals','tasks','templates','integrations','crm_accounts','crm_entities','crm_fields','crm_relations','sync_runs'];
+const tablePreserved=Object.fromEntries(oldTables.map(table=>[table,digest(rows(before,`SELECT * FROM ${table} ORDER BY 1`))===digest(rows(after,`SELECT * FROM ${table} ORDER BY 1`))]));
+const oldColumns=rows(before,'PRAGMA table_info(meetings)').map(r=>String(r[1]));const originalIds=rows(before,'SELECT id FROM meetings').map(r=>String(r[0]));const placeholders=originalIds.map(()=>'?').join(',');const currentOldMeetings=originalIds.length?after.exec(`SELECT ${oldColumns.join(',')} FROM meetings WHERE id IN (${placeholders}) ORDER BY id`,originalIds)[0]?.values??[]:[];
+const originalMeetingsPreserved=digest(rows(before,`SELECT ${oldColumns.join(',')} FROM meetings ORDER BY id`))===digest(currentOldMeetings);
+const originalSettings=rows(before,'SELECT key,value FROM app_settings ORDER BY key');const currentSettings=rows(after,'SELECT key,value FROM app_settings');const settingsPreserved=originalSettings.every(([key,value])=>currentSettings.some(([k,v])=>key===k&&value===v));
+const report={tablePreserved,originalMeetingsPreserved,settingsPreserved,migrations:rows(after,'SELECT version FROM schema_migrations ORDER BY version').flat(),importedMeetings:Number(rows(after,"SELECT COUNT(*) FROM meetings WHERE source='kontur_talk'")[0][0]),segments:Number(rows(after,'SELECT COUNT(*) FROM transcript_segments')[0][0])};before.close();after.close();if(Object.values(tablePreserved).some(v=>!v)||!originalMeetingsPreserved||!settingsPreserved||!report.migrations.includes(4))throw new Error('Installed upgrade preservation failed');fs.writeFileSync('docs/validation/kontur-upgrade.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

@@ -1,0 +1,46 @@
+{
+  "migrations": [
+    [
+      1,
+      "001_initial.sql"
+    ],
+    [
+      2,
+      "002_amocrm.sql"
+    ]
+  ],
+  "profile": [
+    [
+      "user-1",
+      "Алексей Смирнов",
+      "2026-10-03T14:26:47.198Z",
+      "2026-10-03T14:26:47.198Z"
+    ]
+  ],
+  "settings": [
+    [
+      "data_mode",
+      "demo"
+    ],
+    [
+      "demo_mode",
+      "on"
+    ],
+    [
+      "demo_seed_version",
+      "1"
+    ],
+    [
+      "notifications",
+      "on"
+    ]
+  ],
+  "counts": {
+    "clients": 8,
+    "deals": 10,
+    "meetings": 8,
+    "tasks": 10,
+    "templates": 2
+  },
+  "preserved": true
+}

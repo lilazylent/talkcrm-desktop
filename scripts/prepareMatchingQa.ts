@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {SqliteRepository} from '../electron/repository.ts';
+import {batchFixture} from '../tests/crmFixture.ts';
+import type {KonturAccount,TalkImport} from '../src/domain/kontur.ts';
+
+// Synthetic disposable data only. This directory is never the normal userData.
+const directory=path.resolve('release/matching-qa');fs.mkdirSync(directory,{recursive:true});
+const database=path.join(directory,'talkcrm.sqlite');if(fs.existsSync(database))fs.unlinkSync(database);
+const repo=new SqliteRepository(database,path.resolve('migrations'),process.cwd(),'0.4.0');await repo.initialize();
+const b=batchFixture();b.contacts[0].name='Иван Петров';b.contacts[0].custom_fields_values=[{field_code:'EMAIL',values:[{value:'ivan@example.test'}]}];b.companies[0].name='ООО «Ромашка — исследовательская компания с очень длинным названием и несколькими подразделениями»';
+b.leads[0].name='Внедрение партнёрской платформы';b.contacts.push({id:21,name:'Мария Орлова',custom_fields_values:[{field_code:'EMAIL',values:[{value:'maria@example.test'}]}]});b.leads.push({...b.leads[0],id:12,name:'Продление лицензий'},{...b.leads[0],id:13,name:'Проект без компании'});b.relations.push({leadId:12,entityId:30,entityType:'companies',primary:false},{leadId:12,entityId:20,entityType:'contacts',primary:true},{leadId:13,entityId:21,entityType:'contacts',primary:true});
+await repo.connectAccount(b.account);await repo.commitCrmSync(b,await repo.startSync());
+const talk:KonturAccount={id:'synthetic-talk',domain:'test.ktalk.ru',mode:'session',externalUserId:'qa',displayName:'Тестовые данные',state:'connected',lastSyncAt:null,error:null,meetingCount:0};await repo.connectKontur(talk);
+const recording=(id:string,title:string,email:string|null,summary:string|null):TalkImport=>({meetingExternalId:id,recordingExternalId:id,title,startedAt:'2026-10-04T10:00:00Z',endedAt:null,durationSeconds:600,organizer:null,sourceCreatedAt:null,sourceUpdatedAt:null,participants:email?[{externalId:'p',displayName:'Гость',email,role:null,organizer:null}]:[],artifacts:[{recordingId:id,type:'summary',state:summary?'ready':'not_available',externalId:null,version:null,generatedAt:null,text:summary,sections:[],sourceUrl:null},{recordingId:id,type:'transcript',state:'ready',externalId:null,version:null,generatedAt:null,text:null,sections:[],sourceUrl:null}],segments:[{recordingId:id,externalId:'s',speakerId:null,speakerName:'Гость',startMs:194000,endMs:196000,text:summary??'Внутренняя беседа без упоминаний клиентов'}]});
+await repo.commitKonturMeetings(talk,[recording('none','Без кандидата',null,null),recording('strong','Один сильный кандидат','maria@example.test','Проект без компании'),recording('several','Несколько сделок','ivan@example.test',null),recording('evidence','Переход к доказательству',null,'Внедрение партнёрской платформы')]);
+await repo.updateProfile('Проверка Phase 4 — тестовые данные');const snapshot=await repo.snapshot();const materialsByMeeting=Object.fromEntries(snapshot.meetings.map(m=>[m.id,repo.getMeetingArtifacts(m.id)]));const segments=snapshot.meetings.flatMap(m=>repo.getTranscriptPage(m.id,0,100,'').segments);fs.writeFileSync('public/matching-preview.json',JSON.stringify({snapshot,materials:materialsByMeeting[snapshot.meetings[0].id],materialsByMeeting,segments}));repo.close();console.log('Synthetic Phase 4 database and browser preview prepared.');

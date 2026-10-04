@@ -1,0 +1,10 @@
+import {describe,it,expect} from 'vitest';
+import {SessionTalkAdapter,ApiTalkAdapter} from '../electron/kontur/adapters.ts';
+describe('Kontur read contracts',()=>{
+  it('uses observed GET paths, source identities and artifact timing without downloading media',async()=>{
+    const paths:string[]=[];const get=async(path:string)=>{paths.push(path);if(path==='/api/context')return{user:{key:'employee',firstname:'Дмитрий'}};if(path.startsWith('/api/recordings?'))return{recordings:[{id:'record1',createdDate:'2026-10-01T10:00:00Z'}]};if(path==='/api/conferencesHistory/recent')return[{conference:{key:'conference1',startTime:'2026-10-01T09:00:00Z',endTime:'2026-10-01T10:00:00Z'}}];if(path==='/api/recordings/record1')return{id:'record1',conferenceKey:'conference1',title:'Совещание',status:'complete',participants:[]};if(path==='/api/recordings/v2/record1/summary')return{transcriptionV2:{status:'success',tracks:[{speaker:{userInfo:{firstname:'Дмитрий'}},chunks:[{text:'Точная фраза',startTimeOffsetInMillis:42123,endTimeOffsetInMillis:45234}]}]},shortSummaryV2:{status:'notFound'},protocolV2:{status:'notAvailable'}};throw Error('Unexpected request');};
+    const adapter=new SessionTalkAdapter('workspace.ktalk.ru',get);expect((await adapter.identify()).externalUserId).toBe('employee');const result=await adapter.fetchMeetings('2026-07-01T00:00:00Z','2026-10-04T00:00:00Z');expect(result[0].startedAt).toBe('2026-10-01T09:00:00.000Z');expect(result[0].segments[0].startMs).toBe(42123);expect(paths.every(p=>p.startsWith('/api/'))).toBe(true);expect(paths.some(p=>/download|fileUrl/.test(p))).toBe(false);
+  });
+  it('uses official cursor pagination and rejects repeated cursors',async()=>{const adapter=new ApiTalkAdapter('workspace.ktalk.ru',async()=>({entities:[],nextPageToken:'repeat'}));await expect(adapter.fetchMeetings('2026-07-01','2026-10-04')).rejects.toThrow();});
+  it('rejects missing employee identity rather than importing another cache',async()=>{await expect(new SessionTalkAdapter('workspace.ktalk.ru',async()=>({})).identify()).rejects.toThrow();});
+});

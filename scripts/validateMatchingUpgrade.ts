@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import initSqlJs from 'sql.js';
+const directory=path.join(process.env.APPDATA!,'TalkCRM Desktop');const SQL=await initSqlJs();
+const before=new SQL.Database(new Uint8Array(fs.readFileSync(path.join(directory,'backups/phase4-20261004/talkcrm-before-0.4.0.sqlite'))));const after=new SQL.Database(new Uint8Array(fs.readFileSync(path.join(directory,'talkcrm.sqlite'))));
+const digest=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');const rows=(db:InstanceType<typeof SQL.Database>,sql:string)=>db.exec(sql)[0]?.values??[];
+const tables=rows(before,"SELECT name FROM sqlite_master WHERE type='table' AND name<>'schema_migrations'").map(r=>String(r[0]));
+const preserved=Object.fromEntries(tables.map(table=>{const columns=rows(before,`PRAGMA table_info(${table})`).map(r=>String(r[1]));return[table,digest(rows(before,`SELECT ${columns.join(',')} FROM ${table} ORDER BY 1,2`))===digest(rows(after,`SELECT ${columns.join(',')} FROM ${table} ORDER BY 1,2`))];}));
+const report={version:'0.4.0',preserved,migrations:rows(after,'SELECT version FROM schema_migrations ORDER BY version').flat(),counts:{meetings:Number(rows(after,"SELECT COUNT(*) FROM meetings WHERE source='kontur_talk'")[0][0]),recordings:Number(rows(after,"SELECT COUNT(*) FROM meeting_artifacts WHERE type='recording'")[0][0]),segments:Number(rows(after,'SELECT COUNT(*) FROM transcript_segments')[0][0]),retellings:Number(rows(after,"SELECT COUNT(*) FROM meeting_artifacts WHERE type='summary' AND state='ready'")[0][0]),confirmed:Number(rows(after,"SELECT COUNT(*) FROM meeting_crm_links WHERE confirmed_json IS NOT NULL")[0][0])}};
+before.close();after.close();fs.writeFileSync('docs/validation/matching-upgrade.json',JSON.stringify(report,null,2));if(Object.values(preserved).some(v=>!v)||!report.migrations.includes(5))throw new Error('Upgrade preservation failed');console.log(JSON.stringify(report,null,2));
