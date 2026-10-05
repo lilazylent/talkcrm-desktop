@@ -10,7 +10,7 @@ export const phoneOrEmail = (entity: CrmRecord | undefined, code: string): strin
   return null;
 };
 export function projectRecord(entity: CrmRecord): CrmRecord {
-  const keys=['id','name','text','created_at','updated_at','responsible_user_id','pipeline_id','status_id','price','closed_at','is_deleted','custom_fields_values','_embedded','params','note_type','entity_id','entity_type','complete_till','is_completed','task_type_id','type','code','sort','enums','is_required','is_predefined','color'];
+  const keys=['id','name','text','created_at','updated_at','responsible_user_id','pipeline_id','status_id','price','closed_at','is_deleted','custom_fields_values','_embedded','params','note_type','entity_id','entity_type','complete_till','is_completed','task_type_id','type','code','sort','enums','is_required','is_predefined','color','result','group_id','is_api_only','required_statuses','is_computed','created_by','updated_by','first_name','last_name','account_id','duration'];
   return Object.fromEntries(keys.filter(key=>entity[key]!==undefined).map(key=>[key,entity[key]])) as CrmRecord;
 }
 export function mapWorkspace(account: CrmAccount, leads: CrmRecord[], cache: CrmCache, relations: CrmRelation[], taskRecords: CrmRecord[]): {clients: Client[]; deals: Deal[]; tasks: Task[]} {
@@ -33,12 +33,13 @@ export function mapWorkspace(account: CrmAccount, leads: CrmRecord[], cache: Crm
     if (!existing || contact) clients.set(clientId,{...client,availability});
     else existing.availability=availability;
     const stage=stages.get(Number(lead.status_id));
-    return {source:'amocrm',pipelineId:Number(lead.pipeline_id),statusId:Number(lead.status_id),availability:String(lead.cacheAvailability??'active'),lastSeenAt:typeof lead.lastSeenAt==='string'?lead.lastSeenAt:undefined,closedAt:typeof lead.closed_at==='number'&&lead.closed_at>0?isoTime(lead.closed_at):null,id:localId(account.id,'lead',lead.id),externalId:String(lead.id),clientId,title:lead.name??`Сделка #${lead.id}`,pipelineName:stage?.pipeline??`Воронка #${lead.pipeline_id}`,stageName:lead.status_id===142?'Успешно реализовано':lead.status_id===143?'Закрыта и не реализована':stage?.name??`Этап #${lead.status_id}`,responsibleName:owner,amount:typeof lead.price==='number'?lead.price:null,currency:account.currency??null,createdAt:isoTime(lead.created_at),updatedAt:isoTime(lead.updated_at)};
+    return {remoteUpdatedAt:typeof lead.updated_at==='number'?lead.updated_at:null,source:'amocrm',pipelineId:Number(lead.pipeline_id),statusId:Number(lead.status_id),availability:String(lead.cacheAvailability??'active'),lastSeenAt:typeof lead.lastSeenAt==='string'?lead.lastSeenAt:undefined,closedAt:typeof lead.closed_at==='number'&&lead.closed_at>0?isoTime(lead.closed_at):null,id:localId(account.id,'lead',lead.id),externalId:String(lead.id),clientId,title:lead.name??`Сделка #${lead.id}`,pipelineName:stage?.pipeline??`Воронка #${lead.pipeline_id}`,stageName:lead.status_id===142?'Успешно реализовано':lead.status_id===143?'Закрыта и не реализована':stage?.name??`Этап #${lead.status_id}`,responsibleName:owner,amount:typeof lead.price==='number'?lead.price:null,currency:account.currency??null,createdAt:isoTime(lead.created_at),updatedAt:isoTime(lead.updated_at)};
   });
   const tasks: Task[]=taskRecords.filter(t=>t.responsible_user_id===account.currentUserId).map(t=>{
     const entityId=Number(t.entity_id); const lead=t.entity_type==='leads'?leads.find(l=>l.id===entityId):undefined;
     const relation=t.entity_type==='contacts'||t.entity_type==='companies'?relations.find(r=>r.entityType===t.entity_type&&r.entityId===entityId):undefined;
-    return {id:localId(account.id,'task',t.id),externalId:String(t.id),source:'amocrm',dealId:lead?localId(account.id,'lead',lead.id):null,clientId:leadClients.get(lead?.id??relation?.leadId??0)??null,title:text(t.text)??'Задача amoCRM',dueAt:typeof t.complete_till==='number'&&t.complete_till>0?isoTime(t.complete_till):null,completed:t.is_completed===true,createdAt:isoTime(t.created_at),updatedAt:isoTime(t.updated_at)};
+    const result=t.result&&typeof t.result==='object'?record(t.result).text:null;
+    return {taskTypeId:typeof t.task_type_id==='number'?t.task_type_id:null,entityType:text(t.entity_type)??undefined,entityExternalId:Number.isSafeInteger(entityId)?entityId:undefined,resultText:typeof result==='string'?result:null,remoteUpdatedAt:typeof t.updated_at==='number'?t.updated_at:null,id:localId(account.id,'task',t.id),externalId:String(t.id),source:'amocrm',dealId:lead?localId(account.id,'lead',lead.id):null,clientId:leadClients.get(lead?.id??relation?.leadId??0)??null,title:text(t.text)??'Задача amoCRM',dueAt:typeof t.complete_till==='number'&&t.complete_till>0?isoTime(t.complete_till):null,completed:t.is_completed===true,createdAt:isoTime(t.created_at),updatedAt:isoTime(t.updated_at)};
   });
   return {clients:[...clients.values()],deals,tasks};
 }

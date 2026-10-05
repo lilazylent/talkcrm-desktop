@@ -255,3 +255,5 @@ a.t-row:hover{background:var(--surface-hover)}
 .palette-item.active .list-icon{background:var(--accent);color:#fff}
 .palette-foot{display:flex;gap:var(--s-4);padding:var(--s-3) var(--s-5);border-top:1px solid var(--line);background:var(--surface-2);font-size:var(--fs-meta);color:var(--text-3)}
 kbd{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;border:1px solid var(--line-strong);border-bottom-width:2px;background:var(--surface);font-size:var(--fs-micro);color:var(--text-2);line-height:1}
+.select::after{content:'';position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid var(--text-3);border-bottom:2px solid var(--text-3);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.select:has(> svg:last-child)::after{display:none}

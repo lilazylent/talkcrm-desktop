@@ -3,7 +3,7 @@ import { BrowserWindow, session, safeStorage, type Session } from 'electron';
 import type { SecureCredentialStore } from '../../src/services/contracts.ts';
 import { AmoClient } from './client.ts';
 import { allowedLoginUrl, browserCredentialKey, cookieBundle } from './browserPolicy.ts';
-import { CrmError, endpoint, normalizeDomain } from './security.ts';
+import { CrmError, endpoint, normalizeDomain, writeEndpoint } from './security.ts';
 import { Transport } from './transport.ts';
 export interface BrowserAccess {
   open(domain:string,accountId?:string):Promise<void>;
@@ -43,11 +43,12 @@ export class ElectronBrowserAccess implements BrowserAccess{
   async client(domain:string,accountId?:string):Promise<AmoClient>{
     domain=normalizeDomain(domain);const ses=await this.getSession(domain,accountId);
     const fetcher:typeof fetch=async(input,options)=>{
-      const url=new URL(String(input));endpoint(domain,url.href);
-      if(options?.method!=='GET')throw new CrmError('endpoint','В браузерном режиме разрешено только чтение.');
+      const url=new URL(String(input));const method=options?.method??'GET';
+      // Reads use the read allowlist; user-initiated writes are limited to the explicit mutation allowlist.
+      if(method==='GET')endpoint(domain,url.href);else if(method==='POST'||method==='PATCH')writeEndpoint(domain,method,url.pathname+url.search);else throw new CrmError('endpoint','Недопустимый запрос amoCRM.');
       return ses.fetch(url.href,{...options,credentials:'include'});
     };
-    return new AmoClient(domain,null,new Transport(fetcher,undefined,undefined,this.log));
+    return new AmoClient(domain,null,new Transport(fetcher,undefined,undefined,this.log),{'X-Requested-With':'XMLHttpRequest'});
   }
   async persist(domain:string,accountId:string):Promise<void>{
     const ses=this.sessions.get(domain);if(!ses)throw new CrmError('browser_missing','Откройте окно входа в amoCRM.');

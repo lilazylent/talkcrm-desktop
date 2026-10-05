@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, createContext, useContext, Component, useCallback, type ReactNode } from 'react';
-import { HashRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, BriefcaseBusiness, CalendarDays, ListTodo, FileText, Settings as SettingsIcon, RotateCcw, Search, RefreshCw, PanelLeftClose, PanelLeftOpen, Moon, Sun, MonitorSmartphone, CircleAlert, Check, X, type LucideIcon } from 'lucide-react';
 import type { AppSnapshot } from './domain/models.ts';
 import { activeDeal, formatDate } from './domain/models.ts';
@@ -9,7 +9,7 @@ import { getBrowserDemoApi } from './services/browserDemo.ts';
 import { Dashboard, ClientsPage, ClientDetailsPage, DealsPage, MeetingsPage, MeetingDetailsPage, TasksPage, TemplatesPage, SettingsPage } from './pages/Screens.tsx';
 import { CommandPalette } from './components/CommandPalette.tsx';
 import { Logo } from './components/Logo.tsx';
-import { Avatar, EmptyState, Notice } from './components/ui.tsx';
+import { Avatar, EmptyState, Modal, Notice } from './components/ui.tsx';
 import '@fontsource-variable/onest';
 import '@fontsource-variable/jetbrains-mono';
 import './styles/tokens.css';
@@ -17,9 +17,10 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/layout.css';
 import './styles/pages.css';
+import './styles/workspace.css';
 
 export type ThemeChoice = 'system'|'light'|'dark';
-interface AppState { data: AppSnapshot; busy: boolean; error: string | null; mutate: (work: (api: DesktopApi) => Promise<AppSnapshot>) => Promise<void>; clearError: () => void; crmAction?: (work:(api:DesktopApi)=>Promise<CrmResult>)=>Promise<CrmResult>; progress?:SyncProgress|null; theme: ThemeChoice; setTheme: (theme: ThemeChoice) => void; openPalette: () => void }
+interface AppState { api: DesktopApi; reload: () => Promise<void>; online: boolean; canWrite: boolean; writeBlock: string | null; dirty: (key: string, value: boolean) => void; guard: (proceed: () => void) => void; data: AppSnapshot; busy: boolean; error: string | null; mutate: (work: (api: DesktopApi) => Promise<AppSnapshot>) => Promise<void>; clearError: () => void; crmAction?: (work:(api:DesktopApi)=>Promise<CrmResult>)=>Promise<CrmResult>; progress?:SyncProgress|null; theme: ThemeChoice; setTheme: (theme: ThemeChoice) => void; openPalette: () => void }
 const StateContext = createContext<AppState | null>(null);
 export function useApp(): AppState { const state = useContext(StateContext); if (!state) throw new Error('Application context missing'); return state; }
 
@@ -46,7 +47,7 @@ function useTheme(api: DesktopApi | undefined): [ThemeChoice, (theme: ThemeChoic
 
 interface NavItem { to: string; label: string; icon: LucideIcon; end?: boolean; badge?: number; tone?: 'danger'|'warning' }
 function Sidebar({ data, collapsed, onToggle }: { data: AppSnapshot; collapsed: boolean; onToggle: () => void }) {
-  const { theme, setTheme } = useApp();
+  const { theme, setTheme, guard } = useApp(); const navigate = useNavigate();
   const now = new Date().toISOString();
   const overdue = data.tasks.filter(task => !task.completed && task.dueAt && task.dueAt < now).length;
   const review = data.meetings.filter(meeting => !meeting.crmLink?.confirmed && meeting.matchingStatus !== 'linked' || meeting.crmLink?.status === 'needs_review').length;
@@ -56,7 +57,7 @@ function Sidebar({ data, collapsed, onToggle }: { data: AppSnapshot; collapsed: 
     { to: '/tasks', label: 'Задачи', icon: ListTodo, badge: overdue, tone: 'danger' }
   ];
   const system: NavItem[] = [{ to: '/templates', label: 'Шаблоны', icon: FileText }, { to: '/settings', label: 'Настройки', icon: SettingsIcon }];
-  const link = (item: NavItem) => <NavLink key={item.to} to={item.to} end={item.end} aria-label={item.label} title={collapsed ? item.label : undefined} className={({ isActive }) => `sb-link${isActive ? ' active' : ''}`}><item.icon size={19} strokeWidth={1.9}/><span className="sb-label">{item.label}</span>{!!item.badge && <span aria-hidden="true" className={`sb-badge${item.tone ? ' ' + item.tone : ''}`}><span>{item.badge}</span></span>}</NavLink>;
+  const link = (item: NavItem) => <NavLink key={item.to} to={item.to} end={item.end} onClick={event => { event.preventDefault(); guard(() => navigate(item.to)); }} aria-label={item.label} title={collapsed ? item.label : undefined} className={({ isActive }) => `sb-link${isActive ? ' active' : ''}`}><item.icon size={19} strokeWidth={1.9}/><span className="sb-label">{item.label}</span>{!!item.badge && <span aria-hidden="true" className={`sb-badge${item.tone ? ' ' + item.tone : ''}`}><span>{item.badge}</span></span>}</NavLink>;
   const crm = data.crm?.account; const kontur = data.kontur;
   const sources = [
     { name: 'amoCRM', state: crm ? (crm.authorized ? (crm.state === 'failed' ? 'err' : crm.state === 'partial_error' ? 'warn' : 'on') : 'warn') : 'off', detail: crm ? (crm.authorized ? 'Подключено' : 'Только кэш') : 'Не подключено' },
@@ -101,6 +102,8 @@ function AppContent() {
   const [progress,setProgress]=useState<SyncProgress|null>(null);
   const [message,setMessage]=useState<string|null>(null);
   const [palette, setPalette] = useState(false);
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine !== false);
+  const [dirtyKeys, setDirtyKeys] = useState<string[]>([]); const [pending, setPending] = useState<(() => void) | null>(null);
   const [collapsed, setCollapsed] = useState(() => readLocal('talkcrm.sidebar') === 'collapsed');
   const api = useMemo(() => window.talkcrm ?? (import.meta.env.DEV ? getBrowserDemoApi() : undefined), []);
   const [theme, setTheme] = useTheme(api);
@@ -115,7 +118,12 @@ function AppContent() {
     const onKey = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' || (event.ctrlKey || event.metaKey) && event.code === 'KeyK') { event.preventDefault(); setPalette(open => !open); } };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, []);
+  useEffect(() => { const up = () => setOnline(true), down = () => setOnline(false); window.addEventListener('online', up); window.addEventListener('offline', down); return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); }; }, []);
+  useEffect(() => { if (!dirtyKeys.length) return; const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn); }, [dirtyKeys.length]);
   const openPalette = useCallback(() => setPalette(true), []);
+  const dirty = useCallback((key: string, value: boolean) => setDirtyKeys(keys => value ? (keys.includes(key) ? keys : [...keys, key]) : keys.filter(k => k !== key)), []);
+  const guard = useCallback((proceed: () => void) => { if (dirtyKeys.length) setPending(() => proceed); else proceed(); }, [dirtyKeys.length]);
+  const reload = useCallback(async () => { if (api) setData(await api.getSnapshot()); }, [api]);
   const mutate = async (work: (api: DesktopApi) => Promise<AppSnapshot>) => {
     if (!api || busy) return;
     setBusy(true); setError(null);
@@ -130,13 +138,16 @@ function AppContent() {
     finally{setBusy(false);}
   };
   if (!data) return <div className="full-state"><Logo className="brand-logo" size={72}/><h1>TalkCRM</h1><p>{error ?? 'Загружаем рабочее пространство…'}</p>{!error && <div className="boot-line"/>}{error && <button className="btn btn-primary" onClick={() => window.location.reload()}><RotateCcw size={16}/>Повторить</button>}</div>;
+  const account = data.crm?.account; const realMode = data.settings.data_mode === 'amocrm';
+  const writeBlock = !realMode || !account ? 'Редактирование доступно после подключения amoCRM.' : !account.authorized ? 'Подключение к amoCRM отключено. Данные доступны только для просмотра.' : !online ? 'Нет соединения с amoCRM. Данные доступны только для просмотра.' : null;
   const toggle = () => { const next = !collapsed; setCollapsed(next); writeLocal('talkcrm.sidebar', next ? 'collapsed' : 'expanded'); };
-  return <StateContext.Provider value={{ data, busy, error, mutate, crmAction,progress, clearError: () => setError(null), theme, setTheme, openPalette }}>
+  return <StateContext.Provider value={{ api: api!, reload, online, canWrite: !writeBlock, writeBlock, dirty, guard, data, busy, error, mutate, crmAction,progress, clearError: () => setError(null), theme, setTheme, openPalette }}>
     <div className={`app${collapsed ? ' collapsed' : ''}`}>
       <Sidebar data={data} collapsed={collapsed} onToggle={toggle}/>
       <main className="main">
         <Topbar data={data} busy={busy} progress={progress} onSync={() => void crmAction(api => api.syncCrm())}/>
         <div className="content"><ScrollReset/><div className="page">
+          {realMode && account && writeBlock && account.authorized && <div className="page-alert"><Notice tone="warning" icon={CircleAlert} role="status">{writeBlock}</Notice></div>}
           {error && <div className="page-alert"><Notice tone="danger" icon={CircleAlert} role="alert" onClose={() => setError(null)}>{error}</Notice></div>}
           <Routes>
             <Route path="/" element={<Dashboard/>}/><Route path="/clients" element={<ClientsPage/>}/><Route path="/clients/:id" element={<ClientDetailsPage/>}/>
@@ -148,6 +159,7 @@ function AppContent() {
       </main>
       {message && <div className="toasts"><div className="toast" role="status"><span className="toast-icon"><Check size={16}/></span><div className="grow">{message}</div><button className="icon-btn" onClick={() => setMessage(null)} aria-label="Скрыть результат"><X size={16}/></button></div></div>}
       {palette && <CommandPalette data={data} onClose={() => setPalette(false)}/>}
+      {pending && <Modal title="Уйти без сохранения?" icon={CircleAlert} onClose={() => setPending(null)}><p>Изменения в карточке ещё не сохранены в amoCRM. Если уйти, они пропадут.</p><div className="modal-actions"><button className="btn" onClick={() => setPending(null)}>Остаться</button><button className="btn btn-danger" onClick={() => { const go = pending; setPending(null); setDirtyKeys([]); go(); }}>Уйти без сохранения</button></div></Modal>}
     </div>
   </StateContext.Provider>;
 }

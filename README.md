@@ -1,8 +1,8 @@
 # TalkCRM Desktop
 
-TalkCRM Desktop 0.4.1 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
+TalkCRM Desktop 0.5.0 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
 
-amoCRM and its existing read-only integration are preserved. Real and demo data are separate. Phase 4 adds local meeting/client/deal proposals with explanations and mandatory human confirmation. AI generation and CRM write-back remain later work.
+Phase 5 (0.5.0) turns the client card into the manager's workspace with safe amoCRM write-back: edit deals (name, budget, stage, custom fields), contacts and companies, create/edit/reschedule/complete tasks, add notes, and see a unified history. amoCRM stays the system of record: every change is validated, sent with only the changed fields, confirmed by amoCRM and reconciled into the cache. Real and demo data are separate. Phase 4 meeting/client/deal proposals still require human confirmation. AI generation, chats and telephony remain later work.
 
 ## Prerequisites
 
@@ -48,6 +48,10 @@ Open **Настройки → Интеграции → Контур.Толк →
 
 Meetings have five tabs, exact source speakers/timestamps, local Cyrillic text search and bounded transcript pages. Source recording links open in Kontur.Talk. Videos are not downloaded automatically. Disconnect keeps the local cache unless you explicitly select deletion. See [verified contracts and limitations](docs/KONTUR_TALK_INTEGRATION.md).
 
+## Client workspace and amoCRM write-back
+
+Open any client. The header shows contact, phone, email, responsible, deals and quick actions **Добавить задачу** / **Добавить примечание**. Tabs: Обзор, История, Задачи, Встречи. Cards switch to edit mode with **Редактировать**; only changed fields are sent; concurrent amoCRM edits are detected instead of overwritten. Closing a deal requires confirmation. Offline, everything is read-only and nothing is queued. See [CRM workspace](docs/CRM_WORKSPACE.md) and [write safety rules](docs/AMOCRM_WRITE_SAFETY.md). Migration 006 adds the write audit (`crm_operations`), cached history events and field groups without touching existing data.
+
 ## Meeting ↔ CRM matching
 
 Open a Kontur meeting and use **Связь с CRM**. **Найти клиента** produces local candidates with confidence and source evidence. Confirm a proposal or search manually by company/contact/deal. A client can be confirmed without a deal. **Изменить связь** and **Убрать связь** change only the local relationship. Confirmed meetings appear in the client workspace and corresponding deal section; transcript reasons navigate to the source segment.
@@ -69,4 +73,4 @@ The meetings list supports confirmed/review/unlinked filters and batch proposals
 
 See [architecture](docs/ARCHITECTURE.md), [design system](docs/DESIGN_SYSTEM.md) and [roadmap](docs/ROADMAP.md).
 
-Version 0.4.1 is a full interface redesign: new design system (Onest + JetBrains Mono, light/dark themes), frameless native window, dashboard with pipeline, meeting workspace with a sticky CRM-match panel, deals board view and Ctrl+K quick search. Data, integrations and migrations are unchanged.
+Version 0.4.1 was a full interface redesign: new design system (Onest + JetBrains Mono, light/dark themes), frameless native window, dashboard with pipeline, meeting workspace with a sticky CRM-match panel, deals board view and Ctrl+K quick search. Data, integrations and migrations are unchanged.

@@ -3,6 +3,7 @@ import type { DesktopApi } from './contracts.ts';
 import type {MeetingArtifacts,TranscriptSegment} from '../domain/kontur.ts';
 import {MatchingIndex} from '../../electron/matching/engine.ts';
 import {emptyCrmLink,type MatchCandidate} from '../domain/matching.ts';
+import {previewWrite} from './previewWrites.ts';
 
 let snapshot: AppSnapshot | null = null;
 let preview:{snapshot:AppSnapshot;materials:MeetingArtifacts;segments:TranscriptSegment[];materialsByMeeting?:Record<string,MeetingArtifacts>}|null=null;
@@ -32,6 +33,9 @@ const api: DesktopApi = {
   async verifyCrmBrowser(){return{ok:false,message:'Проверка доступна в установленном TalkCRM Desktop.'};},
   async syncCrm(){return{ok:false,message:'Синхронизация доступна в установленном TalkCRM Desktop.'};},
   async disconnectCrm(){return{ok:false,message:'Подключение доступно в установленном TalkCRM Desktop.'};},
+  async writeCrm(command){const data=await load();await new Promise(r=>setTimeout(r,450));const {snapshot:next,result}=previewWrite(data,command);snapshot=next;return result;},
+  async refreshWorkspace(){await load();await new Promise(r=>setTimeout(r,500));return{ok:!!preview,message:preview?'Карточка обновлена (предпросмотр).':'Обновление доступно в установленном TalkCRM Desktop.'};},
+  async getTimeline(){const data=await load();return{events:(data.crm as {events?:import('../domain/crm.ts').CrmRecord[]}|undefined)?.events??[],loadedAt:preview?new Date().toISOString():null,error:null};},
   async openKontur(){return{ok:false,message:'Вход доступен в установленном TalkCRM Desktop.'};},
   async connectKontur(){return{ok:false,message:'Подключение доступно в установленном TalkCRM Desktop.'};},
   async syncKontur(){return{ok:false,message:'Синхронизация доступна в установленном TalkCRM Desktop.'};},

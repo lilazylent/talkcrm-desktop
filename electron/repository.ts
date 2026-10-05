@@ -9,7 +9,10 @@ import { seedDemo } from './seed.ts';
 import type {KonturAccount,TalkImport,MeetingArtifacts,TranscriptPage} from '../src/domain/kontur.ts';
 import {konturAccount,saveKonturAccount,putKonturMeetings,konturMeetings,meetingArtifacts,transcriptPage} from './konturPersistence.ts';
 import type { CrmAccount, SyncBatch } from '../src/domain/crm.ts';
-import { accountFromRow, beginSync, commitSync, crmSnapshot, execute, query, saveAccount } from './crmPersistence.ts';
+import { accountFromRow, beginSync, commitSync, crmSnapshot, execute, query, saveAccount, upsertEntity, upsertScoped, type ScopedBatch } from './crmPersistence.ts';
+import type { CrmRecord } from '../src/domain/crm.ts';
+import type { CrmEntityKind } from '../src/domain/crmWrite.ts';
+import type { WriteContext } from './amocrm/writes.ts';
 import type { AppRepository } from '../src/services/contracts.ts';
 import type { AppSnapshot, Client, Deal, Integration, Meeting, Task, UserProfile, CrmTemplate, MatchingStatus } from '../src/domain/models.ts';
 
@@ -84,7 +87,7 @@ export class SqliteRepository implements AppRepository {
     const account = this.getCrmAccount(); const crm = crmSnapshot(db,account);
     const real = settings.data_mode === 'amocrm';
     const kontur=this.getKonturAccount();
-    return { profile, clients: real ? crm.clients : kontur?[]:clients, deals: real ? crm.deals : kontur?[]:deals, meetings: kontur?konturMeetings(db,kontur):real?[]:meetings.filter(m=>!m.source||m.source==='demo'), tasks: real ? crm.tasks : kontur?[]:tasks, integrations, settings, templates, crm: {account,contacts:crm.contacts,companies:crm.companies,pipelines:crm.pipelines,notes:crm.notes,fields:crm.fields,leads:crm.leads,relations:crm.relations},kontur, version: this.version, databaseLocation: this.filePath };
+    return { profile, clients: real ? crm.clients : kontur?[]:clients, deals: real ? crm.deals : kontur?[]:deals, meetings: kontur?konturMeetings(db,kontur):real?[]:meetings.filter(m=>!m.source||m.source==='demo'), tasks: real ? crm.tasks : kontur?[]:tasks, integrations, settings, templates, crm: {account,contacts:crm.contacts,companies:crm.companies,pipelines:crm.pipelines,notes:crm.notes,fields:crm.fields,leads:crm.leads,relations:crm.relations,taskTypes:crm.taskTypes,contactNotes:crm.contactNotes,companyNotes:crm.companyNotes,fieldGroups:crm.fieldGroups,editableNotes:crm.editableNotes},kontur, version: this.version, databaseLocation: this.filePath };
   }
 
   async setTaskCompleted(id: string, completed: boolean): Promise<void> {
@@ -139,5 +142,41 @@ export class SqliteRepository implements AppRepository {
   async confirmMeetingClient(id:string,selection:MatchSelection):Promise<AppSnapshot>{if(!this.ownsKonturMeeting(id))throw new Error('Invalid meeting');this.konturTransaction(()=>confirmLink(this.database,id,selection,this.getCrmAccount()));return this.snapshot();}
   async unlinkMeetingClient(id:string):Promise<AppSnapshot>{if(!this.ownsKonturMeeting(id))throw new Error('Invalid meeting');this.konturTransaction(()=>unlinkMeeting(this.database,id,this.getCrmAccount()));return this.snapshot();}
   getTranscriptLocation(id:string,segmentId:string):number{if(typeof segmentId!=='string'||segmentId.length>100)throw new Error('Invalid segment');const segment=query(this.database,'SELECT recording_id,sequence FROM transcript_segments WHERE meeting_id=? AND id=?',[id,segmentId])[0];if(!segment)throw new Error('Segment unavailable');return Number(query(this.database,'SELECT COUNT(*) AS n FROM transcript_segments WHERE meeting_id=? AND (recording_id<? OR (recording_id=? AND sequence<?))',[id,segment.recording_id,segment.recording_id,segment.sequence])[0].n);}
+  // ---- Phase 5: write-back support. Entity state is only replaced by data amoCRM returned. ----
+  writeContext(): WriteContext {
+    const account=this.getCrmAccount();const db=this.database;
+    const records=(kind:string)=>account?query(db,'SELECT payload_json FROM crm_entities WHERE account_id=? AND kind=?',[account.id,kind]).map(r=>JSON.parse(String(r.payload_json)) as CrmRecord):[];
+    const crm=crmSnapshot(db,account);const kindOf:Record<CrmEntityKind,string>={leads:'lead',contacts:'contact',companies:'company'};
+    const one=(kind:string,id:number)=>account?query(db,"SELECT payload_json FROM crm_entities WHERE account_id=? AND kind=? AND external_id=? AND availability='active'",[account.id,kind,id]).map(r=>JSON.parse(String(r.payload_json)) as CrmRecord)[0]:undefined;
+    const editable=new Set(crm.editableNotes??[]);
+    return {fields:crm.fields,pipelines:crm.pipelines,taskTypes:records('task_type'),entity:(kind,id)=>{const r=one(kindOf[kind],id);return kind==='leads'&&r&&r.responsible_user_id!==account?.currentUserId?undefined:r;},task:id=>one('task',id),noteEditable:(entity,id)=>editable.has(`${entity}:${id}`)};
+  }
+  cachedEntity(kind:string,id:number):CrmRecord|undefined{const account=this.getCrmAccount();if(!account)return undefined;const row=query(this.database,'SELECT payload_json FROM crm_entities WHERE account_id=? AND kind=? AND external_id=?',[account.id,kind,id])[0];return row?JSON.parse(String(row.payload_json)) as CrmRecord:undefined;}
+  async putCrmEntity(kind:string,item:CrmRecord):Promise<void>{const account=this.getCrmAccount();if(!account)throw new Error('No account');upsertEntity(this.database,account.id,kind,item);this.persist();}
+  async mergeScoped(batch:ScopedBatch):Promise<void>{const account=this.getCrmAccount();if(!account)throw new Error('No account');const before=this.database.export();try{upsertScoped(this.database,account.id,batch);this.recalculateMatching();this.persist();}catch(error){this.database.close();this.db=new this.sql!.Database(before);this.db.run('PRAGMA foreign_keys=ON');throw error;}}
+  getOperation(id:string):{status:string;result_external_id:number|null;request_fingerprint:string}|undefined{const r=query(this.database,'SELECT status,result_external_id,request_fingerprint FROM crm_operations WHERE id=?',[id])[0];return r?{status:String(r.status),result_external_id:r.result_external_id===null?null:Number(r.result_external_id),request_fingerprint:String(r.request_fingerprint)}:undefined;}
+  recentConfirmed(fingerprint:string,seconds:number):{id:string;result_external_id:number|null}|undefined{const since=new Date(Date.now()-seconds*1000).toISOString();const r=query(this.database,"SELECT id,result_external_id FROM crm_operations WHERE request_fingerprint=? AND status='confirmed' AND created_at>=? ORDER BY created_at DESC LIMIT 1",[fingerprint,since])[0];return r?{id:String(r.id),result_external_id:r.result_external_id===null?null:Number(r.result_external_id)}:undefined;}
+  async startOperation(op:{id:string;accountId:string;entityType:string;entityId:number;type:string;fingerprint:string;changedFields:string[];userId:number}):Promise<void>{execute(this.database,"INSERT INTO crm_operations(id,account_id,entity_type,entity_external_id,operation_type,status,request_fingerprint,changed_fields_json,user_id,created_at) VALUES(?,?,?,?,?,'sending',?,?,?,?)",[op.id,op.accountId,op.entityType,op.entityId,op.type,op.fingerprint,JSON.stringify(op.changedFields),op.userId,new Date().toISOString()]);this.persist();}
+  async finishOperation(id:string,status:string,patch:{resultId?:number|null;remoteUpdatedAt?:number|null;errorCategory?:string|null}={}):Promise<void>{execute(this.database,'UPDATE crm_operations SET status=?,result_external_id=COALESCE(?,result_external_id),remote_updated_at=COALESCE(?,remote_updated_at),error_category=?,completed_at=? WHERE id=?',[status,patch.resultId??null,patch.remoteUpdatedAt??null,patch.errorCategory??null,new Date().toISOString(),id]);this.persist();}
+  operationHistory(limit=50):{id:string;entity_type:string;entity_external_id:number;operation_type:string;status:string;changed_fields:string[];error_category:string|null;created_at:string}[]{return query(this.database,'SELECT * FROM crm_operations ORDER BY created_at DESC LIMIT ?',[limit]).map(r=>({id:String(r.id),entity_type:String(r.entity_type),entity_external_id:Number(r.entity_external_id),operation_type:String(r.operation_type),status:String(r.status),changed_fields:JSON.parse(String(r.changed_fields_json)) as string[],error_category:r.error_category===null?null:String(r.error_category),created_at:String(r.created_at)}));}
+  async markCrmUnauthorized(message:string):Promise<void>{const account=this.getCrmAccount();if(!account)return;execute(this.database,'UPDATE crm_accounts SET authorized=0,error=? WHERE id=?',[message,account.id]);this.persist();}
+  clientScope(clientId:string):{leadIds:number[];contactIds:number[];companyIds:number[]}{
+    const crm=crmSnapshot(this.database,this.getCrmAccount());const leadIds=crm.deals.filter(d=>d.clientId===clientId&&d.externalId).map(d=>Number(d.externalId));
+    const rel=(crm.relations??[]).filter(r=>leadIds.includes(r.leadId));const client=crm.clients.find(c=>c.id===clientId);
+    const contactIds=[...new Set([...rel.filter(r=>r.entityType==='contacts').map(r=>r.entityId),...(client?.primaryContactId?[client.primaryContactId]:[])])];
+    const companyIds=[...new Set([...rel.filter(r=>r.entityType==='companies').map(r=>r.entityId),...(client?.companyId?[client.companyId]:[])])];
+    return {leadIds,contactIds,companyIds};
+  }
+  async putEvents(entityType:string,entityId:number,events:CrmRecord[],error:string|null):Promise<void>{const account=this.getCrmAccount();if(!account)return;const db=this.database;db.run('BEGIN');try{for(const e of events)execute(db,'INSERT OR REPLACE INTO crm_events VALUES(?,?,?,?,?,?,?)',[account.id,String(e.id),String(e.entity_type),Number(e.entity_id),String(e.type),Number(e.created_at)||0,JSON.stringify({id:e.id,type:e.type,entity_type:e.entity_type,entity_id:e.entity_id,created_at:e.created_at,created_by:e.created_by,value_before:e.value_before,value_after:e.value_after})]);execute(db,'INSERT OR REPLACE INTO crm_event_loads VALUES(?,?,?,?,?)',[account.id,entityType,entityId,new Date().toISOString(),error]);db.run('COMMIT');this.persist();}catch(err){db.run('ROLLBACK');throw err;}}
+  eventsFor(pairs:{type:string;id:number}[]):{events:CrmRecord[];loadedAt:string|null;error:string|null}{
+    const account=this.getCrmAccount();if(!account||!pairs.length)return{events:[],loadedAt:null,error:null};const events:CrmRecord[]=[];let loadedAt:string|null=null;let error:string|null=null;let complete=true;
+    for(const p of pairs){
+      for(const r of query(this.database,'SELECT payload_json FROM crm_events WHERE account_id=? AND entity_type=? AND entity_id=? ORDER BY created_at DESC LIMIT 500',[account.id,p.type,p.id]))events.push(JSON.parse(String(r.payload_json)) as CrmRecord);
+      const load=query(this.database,'SELECT loaded_at,error FROM crm_event_loads WHERE account_id=? AND entity_type=? AND entity_id=?',[account.id,p.type,p.id])[0];
+      if(!load){complete=false;continue;}const at=String(load.loaded_at);if(!loadedAt||at<loadedAt)loadedAt=at;if(load.error)error=String(load.error);
+    }
+    return{events,loadedAt:complete?loadedAt:null,error};
+  }
+
   close(): void { this.db?.close(); this.db = null; }
 }

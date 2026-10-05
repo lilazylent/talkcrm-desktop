@@ -28,15 +28,26 @@ Executable Windows workspace, SQLite migrations, Russian demo UI, local task/pro
 - Meetings filters/batch search, client workspace and deal context, transcript evidence navigation.
 - Real internal meetings have no reliable candidates in the current cached CRM scope. No real relationship is automatically confirmed.
 
-## Phase 5 — not started
+## Phase 5 — CRM workspace and safe amoCRM write-back (0.5.0)
 
-- CRM workspace/template pipeline and structured extraction based on human-confirmed meeting → client → deal relationships.
+- Client workspace: header with quick actions, multiple deals, tabs Обзор / История / Задачи / Встречи; contact-only clients first-class.
+- Deal editing (name, budget, pipeline/stage with terminal confirmation, custom fields), contact editing with multi-value phone/email preservation, company editing.
+- Tasks: create, edit, reschedule, change type, complete with result; completed tasks read-only (reopening not enabled).
+- Common notes: create; edit only TalkCRM-created notes; system notes read-only.
+- Unified timeline from amoCRM events, notes, tasks and confirmed Kontur meetings.
+- Write lifecycle with audit (`crm_operations`), duplicate suppression, conflict detection, post-write reconciliation, no offline queue; migration 006.
+
+## Phase 6+ — not started
+
+- Unified customer chats in the client workspace (tab reserved, not implemented).
+- Telephony and calls.
+- Meeting templates and AI extraction producing proposed `CrmCommand`s that the user approves through the same write path.
 
 ## Later phases
 
 - AI structured extraction from meeting transcripts.
 - Evidence and timestamps for extracted fields.
-- Human review and controlled amoCRM write-back.
+- Human review of AI proposals; approved changes reuse the Phase 5 write commands.
 - Customer messaging from the client workspace.
 
 No external integration or automatic CRM modification is included in Phase 1.

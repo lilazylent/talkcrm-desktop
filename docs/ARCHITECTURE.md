@@ -66,3 +66,17 @@ See KONTUR_TALK_INTEGRATION.md for observed endpoints, session isolation, curren
 ## Phase 4 — local associations (0.4.0)
 
 React MeetingCrmMatch → narrow preload matching IPC → SqliteRepository → MatchingIndex and matching persistence. Source authentication and network transports are unchanged. The engine only reads the local current-manager CRM projection and source materials. No external AI or write operations are introduced. Migration 005 creates authoritative links, candidate/evidence JSON, indexed references and history. The logical meeting owns the mapping; late recording merges transfer confirmed links and preserve conflicting choices in history. Repository commits recalculate proposals; confirmation/reassignment/unlink use atomic local transactions. Snapshot projects confirmed client/deal IDs for workspace navigation and a bounded source retelling preview. Referenced transcript IDs resolve to a bounded page offset through authorized IPC. See MEETING_CRM_MATCHING.md for weights, normalization, contradictions and invariants.
+
+## Phase 5 — workspace and write-back (0.5.0)
+
+```text
+React (EntityCard, StageControl, TaskForm, NoteComposer) → useCrmWrite → DesktopApi.writeCrm
+→ preload → IPC crm:write (main frame only) → CrmService.execute
+→ validateCommand(WriteContext from SQLite cache) → crm_operations 'sending'
+→ performMutation: GET fresh → conflictingKeys → entityPayload/fieldPayload → AmoClient.send (shared Transport limiter, OAuth single-flight or browser session)
+→ GET result → repository.putCrmEntity → crm_operations 'confirmed' → renderer reloads snapshot
+```
+
+`src/domain/crmWrite.ts` defines `CrmCommand` (entity.update, task.create/update/complete, note.create/update), statuses and the shared `comparable()` used for conflict originals. `electron/amocrm/writes.ts` holds pure validation and payload building; `mutations.ts` executes commands, reconciles ambiguous creates, and collects scoped workspace refreshes and history events. `security.ts` adds a separate mutation allowlist (`writeEndpoint`); `Transport.send` retries only 429 and idempotent PATCH 5xx. Repository additions: `writeContext`, `putCrmEntity`, `mergeScoped` (entity-level refresh that never marks unrelated records unavailable), operation audit and event cache. Migration 006: `crm_operations`, `crm_events`, `crm_event_loads`, `crm_field_groups`.
+
+`src/domain/workspace.ts` maps field metadata to editors and back to minimal `FieldChange`s and converts local wall-clock time to amoCRM unix seconds; `src/domain/timeline.ts` normalizes events and composes the feed. The browser preview uses `previewWrites.ts` on synthetic data only. Future AI or template proposals must build the same `CrmCommand` and go through `crm:write` after human approval.

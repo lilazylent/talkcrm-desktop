@@ -1,4 +1,7 @@
-import type { CrmAccount, CrmResult, SyncProgress } from '../../src/domain/crm.ts';
+import type { CrmAccount, CrmRecord, CrmResult, SyncProgress } from '../../src/domain/crm.ts';
+import type { CrmCommand, CrmWriteResult, TimelineData, WriteStatus } from '../../src/domain/crmWrite.ts';
+import { changeKeys, fingerprint, validateCommand } from './writes.ts';
+import { collectEvents, collectScoped, performMutation } from './mutations.ts';
 import type { SecureCredentialStore } from '../../src/services/contracts.ts';
 import { SqliteRepository } from '../repository.ts';
 import { AmoClient } from './client.ts';
@@ -60,6 +63,67 @@ export class CrmService {
     const runId=await this.repository.startSync();
     try{const batch=await collectSync(await this.loadClient(account),account,this.progress);const latest=this.repository.getCrmAccount();if(latest)batch.account.expiresAt=latest.expiresAt;if(account.authMode==='browser')await this.browser?.persist(account.domain,account.id);await this.repository.commitCrmSync(batch,runId);const message=batch.warnings.length?`Синхронизация завершена частично: ${batch.warnings.join(' ')}`:`Обновлено: ${batch.leads.length} сделок, ${batch.contacts.length} контактов, ${batch.companies.length} компаний.`;this.progress({state:batch.warnings.length?'partial_error':'success',stage:message,completed:batch.leads.length,total:batch.leads.length});return{ok:true,message};}
     catch(error){const message=safeMessage(error);const unauthorized=error instanceof CrmError&&(error.status===401||error.code.startsWith('oauth_')||error.code==='browser_missing');await this.repository.failSync(runId,message,unauthorized);this.progress({state:'failed',stage:message,completed:0,total:null});return{ok:false,message};}
+  }
+  // ---- Phase 5: user-initiated amoCRM writes. Same client, limiter and auth refresh as synchronization. ----
+  private writing=new Set<string>();
+  async execute(value:unknown):Promise<CrmWriteResult>{
+    const operationId=value&&typeof value==='object'&&typeof (value as {operationId?:unknown}).operationId==='string'?(value as {operationId:string}).operationId:'';
+    const fail=(message:string,status:WriteStatus='failed'):CrmWriteResult=>({ok:false,status,message,operationId});
+    const account=this.repository.getCrmAccount();
+    if(!account)return fail('Подключите amoCRM в настройках.');
+    if(!account.authorized)return fail('Нет подключения к amoCRM. Данные доступны только для просмотра.');
+    if(this.syncing||this.connecting)return fail('Дождитесь окончания синхронизации amoCRM.');
+    let command:CrmCommand;
+    try{command=validateCommand(value,this.repository.writeContext());}catch(error){return fail(safeMessage(error),error instanceof CrmError&&error.code==='confirm'?'pending':'failed');}
+    const previous=this.repository.getOperation(command.operationId);
+    if(previous?.status==='confirmed')return{ok:true,status:'confirmed',message:'Уже сохранено в amoCRM',operationId,resultId:previous.result_external_id??undefined};
+    if(previous)return fail(previous.status==='sending'?'Изменение уже отправляется.':'Эта операция уже завершилась. Повторите действие заново.');
+    const print=fingerprint(command);
+    // A second click within a few seconds with identical content is treated as the same action.
+    const duplicate=command.type==='note.create'||command.type==='task.create'?this.repository.recentConfirmed(print,15):undefined;
+    if(duplicate)return{ok:true,status:'confirmed',message:'Уже сохранено в amoCRM',operationId,resultId:duplicate.result_external_id??undefined};
+    const target=command.type==='task.update'||command.type==='task.complete'?{type:'tasks',id:command.taskId}:{type:command.entity,id:command.entityId};
+    const lock=`${target.type}:${target.id}`;if(this.writing.has(lock))return fail('Дождитесь сохранения предыдущего изменения.');
+    this.writing.add(lock);const startedAt=Math.floor(Date.now()/1000);
+    const changed=command.type==='entity.update'?changeKeys(command.changes):command.type==='task.update'?['text','completeTill','taskTypeId'].filter(k=>(command as Record<string,unknown>)[k]!==undefined):[];
+    try{
+      await this.repository.startOperation({id:command.operationId,accountId:account.id,entityType:target.type,entityId:target.id,type:command.type,fingerprint:print,changedFields:changed,userId:account.currentUserId});
+      const outcome=await performMutation(await this.loadClient(account),this.repository,account,command,startedAt);
+      await this.repository.finishOperation(command.operationId,'confirmed',{resultId:outcome.resultId??null,remoteUpdatedAt:outcome.remoteUpdatedAt??null});
+      return{ok:true,status:'confirmed',message:outcome.message,operationId,resultId:outcome.resultId};
+    }catch(error){
+      const code=error instanceof CrmError?error.code:'unknown';
+      const status:WriteStatus=code==='conflict'?'conflict':code==='needs_refresh'||code==='ambiguous'?'needs_refresh':'failed';
+      const message=error instanceof CrmError?(code==='ambiguous'?'Не удалось подтвердить сохранение. Обновите карточку перед повтором.':error.message):'Не удалось сохранить изменение в amoCRM.';
+      await this.repository.finishOperation(command.operationId,status,{errorCategory:code}).catch(()=>{});
+      if(error instanceof CrmError&&(error.status===401||code.startsWith('oauth_')||code==='browser_missing')){this.client=null;await this.repository.markCrmUnauthorized('Сессия amoCRM закончилась. Подключите аккаунт снова.');return fail('Сессия amoCRM закончилась. Подключите аккаунт снова.');}
+      return fail(message,status);
+    }finally{this.writing.delete(lock);}
+  }
+  /** Entity-level refresh of one client workspace plus its history events; never a whole-account sync. */
+  async refreshWorkspace(clientId:unknown):Promise<CrmResult>{
+    if(typeof clientId!=='string'||clientId.length>200)return{ok:false,message:'Некорректный клиент.'};
+    const account=this.repository.getCrmAccount();if(!account?.authorized)return{ok:false,message:'Нет подключения к amoCRM. Показаны сохранённые данные.'};
+    if(this.syncing||this.connecting)return{ok:false,message:'Дождитесь окончания синхронизации.'};
+    const scope=this.repository.clientScope(clientId);if(!scope.leadIds.length&&!scope.contactIds.length&&!scope.companyIds.length)return{ok:false,message:'Клиент не найден в кэше amoCRM.'};
+    try{
+      const client=await this.loadClient(account);
+      await this.repository.mergeScoped(await collectScoped(client,account,scope));
+      let historyError:string|null=null;
+      for(const [entity,list] of [['lead',scope.leadIds],['contact',scope.contactIds],['company',scope.companyIds]] as const){
+        if(!list.length)continue;let events=new Map<number,CrmRecord[]>();
+        try{events=await collectEvents(client,entity,list);}catch(error){if(error instanceof CrmError&&error.status===401)throw error;historyError=error instanceof CrmError&&error.status===403?'Нет прав на просмотр истории в amoCRM.':'История amoCRM временно недоступна.';}
+        for(const id of list)await this.repository.putEvents(entity,id,events.get(id)??[],historyError);
+      }
+      return{ok:true,message:historyError?`Карточка обновлена. ${historyError}`:'Карточка обновлена из amoCRM.'};
+    }catch(error){
+      if(error instanceof CrmError&&(error.status===401||error.code==='browser_missing')){this.client=null;await this.repository.markCrmUnauthorized('Сессия amoCRM закончилась. Подключите аккаунт снова.');return{ok:false,message:'Сессия amoCRM закончилась. Подключите аккаунт снова.'};}
+      return{ok:false,message:safeMessage(error)};
+    }
+  }
+  timeline(clientId:unknown):TimelineData{
+    if(typeof clientId!=='string'||clientId.length>200)return{events:[],loadedAt:null,error:null};const scope=this.repository.clientScope(clientId);
+    return this.repository.eventsFor([...scope.leadIds.map(id=>({type:'lead',id})),...scope.contactIds.map(id=>({type:'contact',id})),...scope.companyIds.map(id=>({type:'company',id}))]);
   }
   async disconnect(purge:boolean):Promise<CrmResult>{
     if(typeof purge!=='boolean')return{ok:false,message:'Некорректное действие.'};if(this.syncing||this.connecting)return{ok:false,message:'Дождитесь текущей операции.'};

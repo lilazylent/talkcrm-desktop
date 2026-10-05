@@ -49,7 +49,7 @@ export function Modal({ title, children, onClose, icon: Icon, wide }: { title: s
   const ref = useRef<HTMLDivElement>(null); const close = useRef(onClose); close.current = onClose;
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    ref.current?.querySelector<HTMLElement>('input:not([disabled]),select')?.focus?.();
+    if (!ref.current?.contains(document.activeElement)) ref.current?.querySelector<HTMLElement>('textarea:not([disabled]),input:not([disabled]),select')?.focus?.();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { close.current(); return; }
       if (event.key !== 'Tab' || !ref.current) return;
