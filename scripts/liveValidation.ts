@@ -14,9 +14,10 @@ import { ElectronCredentialStore } from '../electron/credentialStore.ts';
 import { TalkSession } from '../electron/kontur/session.ts';
 import { KonturService } from '../electron/kontur/service.ts';
 import type { CrmCommand } from '../src/domain/crmWrite.ts';
+import { activeTalks, channelLabel } from '../src/domain/talks.ts';
 
 const root = process.env.TALKCRM_QA_ROOT ?? process.cwd(); const userData = path.join(app.getPath('appData'), 'TalkCRM Desktop'); app.setPath('userData', userData);
-const mode = process.argv.includes('--write') ? 'write' : 'read'; const output = path.join(root, `docs/validation/phase5-live-${mode}.json`);
+const mode = process.argv.includes('--write') ? 'write' : 'read'; const output = path.join(root, `docs/validation/phase6-live-${mode}.json`);
 const digest = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 16);
 const log: string[] = []; const httpLog = (line: string) => log.push(line.replace(/request=\S+ /, ''));
 
@@ -26,7 +27,7 @@ app.whenReady().then(async () => {
     const database = path.join(userData, 'talkcrm.sqlite');
     const backupDir = path.join(userData, 'backups', `phase5-${new Date().toISOString().slice(0, 10)}`); fs.mkdirSync(backupDir, { recursive: true });
     const backup = path.join(backupDir, `talkcrm-before-${mode}.sqlite`); if (!fs.existsSync(backup)) fs.copyFileSync(database, backup);
-    repository = new SqliteRepository(database, path.join(root, 'migrations'), root, '0.5.0'); await repository.initialize();
+    repository = new SqliteRepository(database, path.join(root, 'migrations'), root, '0.6.0'); await repository.initialize();
     const store = new ElectronCredentialStore(path.join(userData, 'credentials'));
     const crm = new CrmService(repository, store, new Transport(fetch, undefined, undefined, httpLog), () => {}, new ElectronBrowserAccess(store, httpLog));
     const counts = async () => { const s = await repository!.snapshot(); let segments = 0; for (const m of s.meetings) segments += repository!.getTranscriptPage(m.id, 0, 1, '').total; return { deals: s.crm?.leads?.length ?? 0, contacts: s.crm?.contacts.length ?? 0, companies: s.crm?.companies.length ?? 0, fields: s.crm?.fields.length ?? 0, tasks: s.tasks.length, notes: s.crm?.notes.length ?? 0, taskTypes: s.crm?.taskTypes?.length ?? 0, meetings: s.meetings.length, segments, confirmedLinks: s.meetings.filter(m => m.crmLink?.confirmed).length, settings: digest(s.settings), profile: digest(s.profile) }; };
@@ -41,7 +42,8 @@ app.whenReady().then(async () => {
       const konturAccount = repository.getKonturAccount(); const meetingIds = snap.meetings.map(m => m.id).sort();
       const konturConnect = konturAccount ? await kontur.connect({ mode: 'session', domain: konturAccount.domain }) : { ok: false, message: 'no kontur account' };
       const konturSync = konturConnect.ok ? await kontur.sync() : konturConnect; const afterKontur = await counts();
-      const report = { version: '0.5.0', mode, before, crmSync: { ok: sync.ok, message: sync.ok ? 'ok' : sync.message }, afterSync, workspaceRefresh: { ok: refresh.ok, message: refresh.message, dealsInClient: client ? snap.deals.filter(d => d.clientId === client.id).length : 0, clientHasCompany: !!client?.companyId }, history: { events: timeline.events.length, loadedAt: timeline.loadedAt, error: timeline.error, eventTypes }, kontur: { connect: konturConnect.ok, sync: konturSync.ok, message: konturSync.ok ? 'ok' : konturSync.message, meetingIdsStable: JSON.stringify(meetingIds) === JSON.stringify((await repository.snapshot()).meetings.map(m => m.id).sort()) }, afterKontur, operations: repository.operationHistory().length, http: log.filter(l => !l.includes('method=GET')).length === 0 ? 'GET only' : 'unexpected non-GET', checkedAt: new Date().toISOString() };
+      const talksNow = activeTalks((await repository.snapshot()).crm?.talks); const contactIds = new Set((await repository.snapshot()).crm?.contacts.map(c => c.id)); const channels: Record<string, number> = {}; for (const t of talksNow) channels[channelLabel(t.origin)] = (channels[channelLabel(t.origin)] ?? 0) + 1;
+      const report = { version: '0.6.0', mode, talks: { discovered: talksNow.length, mappedToSyncedContacts: talksNow.filter(t => t.contactId !== null && contactIds.has(t.contactId)).length, linkedToDeal: talksNow.filter(t => t.entityType === 'lead' && t.entityId).length, unread: talksNow.filter(t => !t.isRead).length, inWork: talksNow.filter(t => t.isInWork).length, channels }, before, crmSync: { ok: sync.ok, message: sync.ok ? 'ok' : sync.message }, afterSync, workspaceRefresh: { ok: refresh.ok, message: refresh.message, dealsInClient: client ? snap.deals.filter(d => d.clientId === client.id).length : 0, clientHasCompany: !!client?.companyId }, history: { events: timeline.events.length, loadedAt: timeline.loadedAt, error: timeline.error, eventTypes }, kontur: { connect: konturConnect.ok, sync: konturSync.ok, message: konturSync.ok ? 'ok' : konturSync.message, meetingIdsStable: JSON.stringify(meetingIds) === JSON.stringify((await repository.snapshot()).meetings.map(m => m.id).sort()) }, afterKontur, operations: repository.operationHistory().length, http: log.filter(l => !l.includes('method=GET')).length === 0 ? 'GET only' : 'unexpected non-GET', checkedAt: new Date().toISOString() };
       fs.writeFileSync(output, JSON.stringify(report, null, 2));
     } else {
       const leadId = Number(process.env.TALKCRM_SAFE_LEAD); if (!Number.isSafeInteger(leadId) || leadId <= 0) throw new Error('TALKCRM_SAFE_LEAD is required for write validation');

@@ -5,6 +5,7 @@ import type { ScopedBatch } from '../crmPersistence.ts';
 import { AmoClient } from './client.ts';
 import { changeKeys, conflictingKeys, createdId, entityPayload } from './writes.ts';
 import { CrmError, positiveId, record } from './security.ts';
+import { collectTalks } from './sync.ts';
 
 const entityKind: Record<CrmEntityKind, string> = { leads: 'lead', contacts: 'contact', companies: 'company' };
 const noteKind: Record<CrmEntityKind, string> = { leads: 'note', contacts: 'contact_note', companies: 'company_note' };
@@ -112,6 +113,7 @@ export async function collectScoped(client: AmoClient, account: CrmAccount, scop
     for (const part of chunks(list, 10)) if (part.length) batch.tasks.push(...await client.all('/api/v4/tasks', 'tasks', { 'filter[entity_type]': entity, ...ids(part, 'filter[entity_id]') }));
   for (const lead of batch.leads) batch.notes.push(...(await client.all(`/api/v4/leads/${lead.id}/notes`, 'notes')).map(n => withEntity(n, 'leads', lead.id)));
   for (const id of contactIds) batch.contactNotes.push(...(await client.all(`/api/v4/contacts/${id}/notes`, 'notes')).map(n => withEntity(n, 'contacts', id)));
+  try { batch.talks = await collectTalks(client, contactIds); } catch (error) { if (error instanceof CrmError && error.status === 401) throw error; }
   for (const id of companyIds) batch.companyNotes.push(...(await client.all(`/api/v4/companies/${id}/notes`, 'notes')).map(n => withEntity(n, 'companies', id)));
   return batch;
 }

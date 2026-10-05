@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, createContext, useContext, Component, useCallback, type ReactNode } from 'react';
 import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, BriefcaseBusiness, CalendarDays, ListTodo, FileText, Settings as SettingsIcon, RotateCcw, Search, RefreshCw, PanelLeftClose, PanelLeftOpen, Moon, Sun, MonitorSmartphone, CircleAlert, Check, X, type LucideIcon } from 'lucide-react';
+import { LayoutDashboard, Users, BriefcaseBusiness, CalendarDays, ListTodo, FileText, MessagesSquare, Settings as SettingsIcon, RotateCcw, Search, RefreshCw, PanelLeftClose, PanelLeftOpen, Moon, Sun, MonitorSmartphone, CircleAlert, Check, X, type LucideIcon } from 'lucide-react';
 import type { AppSnapshot } from './domain/models.ts';
 import { activeDeal, formatDate } from './domain/models.ts';
 import type { DesktopApi } from './services/contracts.ts';
@@ -8,6 +8,8 @@ import type { CrmResult, SyncProgress } from './domain/crm.ts';
 import { getBrowserDemoApi } from './services/browserDemo.ts';
 import { Dashboard, ClientsPage, ClientDetailsPage, DealsPage, MeetingsPage, MeetingDetailsPage, TasksPage, TemplatesPage, SettingsPage } from './pages/Screens.tsx';
 import { CommandPalette } from './components/CommandPalette.tsx';
+import { MessagesPage } from './pages/Messages.tsx';
+import { unreadCount } from './domain/talks.ts';
 import { Logo } from './components/Logo.tsx';
 import { Avatar, EmptyState, Modal, Notice } from './components/ui.tsx';
 import '@fontsource-variable/onest';
@@ -53,7 +55,7 @@ function Sidebar({ data, collapsed, onToggle }: { data: AppSnapshot; collapsed: 
   const review = data.meetings.filter(meeting => !meeting.crmLink?.confirmed && meeting.matchingStatus !== 'linked' || meeting.crmLink?.status === 'needs_review').length;
   const work: NavItem[] = [
     { to: '/', label: 'Главная', icon: LayoutDashboard, end: true }, { to: '/meetings', label: 'Встречи', icon: CalendarDays, badge: review, tone: 'warning' },
-    { to: '/clients', label: 'Клиенты', icon: Users }, { to: '/deals', label: 'Сделки', icon: BriefcaseBusiness, badge: data.deals.filter(activeDeal).length },
+    { to: '/messages', label: 'Сообщения', icon: MessagesSquare, badge: unreadCount(data.crm?.talks), tone: 'warning' }, { to: '/clients', label: 'Клиенты', icon: Users }, { to: '/deals', label: 'Сделки', icon: BriefcaseBusiness, badge: data.deals.filter(activeDeal).length },
     { to: '/tasks', label: 'Задачи', icon: ListTodo, badge: overdue, tone: 'danger' }
   ];
   const system: NavItem[] = [{ to: '/templates', label: 'Шаблоны', icon: FileText }, { to: '/settings', label: 'Настройки', icon: SettingsIcon }];
@@ -152,7 +154,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Dashboard/>}/><Route path="/clients" element={<ClientsPage/>}/><Route path="/clients/:id" element={<ClientDetailsPage/>}/>
             <Route path="/deals" element={<DealsPage/>}/><Route path="/meetings" element={<MeetingsPage/>}/><Route path="/meetings/:id" element={<MeetingDetailsPage/>}/>
-            <Route path="/tasks" element={<TasksPage/>}/><Route path="/templates" element={<TemplatesPage/>}/><Route path="/settings" element={<SettingsPage/>}/>
+            <Route path="/messages" element={<MessagesPage/>}/><Route path="/tasks" element={<TasksPage/>}/><Route path="/templates" element={<TemplatesPage/>}/><Route path="/settings" element={<SettingsPage/>}/>
             <Route path="*" element={<EmptyState title="Страница не найдена"/>}/>
           </Routes>
         </div></div>

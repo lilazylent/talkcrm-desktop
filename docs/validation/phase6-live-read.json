@@ -1,0 +1,85 @@
+{
+  "version": "0.6.0",
+  "mode": "read",
+  "talks": {
+    "discovered": 80,
+    "mappedToSyncedContacts": 80,
+    "linkedToDeal": 80,
+    "unread": 5,
+    "inWork": 60,
+    "channels": {
+      "WhatsApp": 65,
+      "MAX": 3,
+      "Telegram": 12
+    }
+  },
+  "before": {
+    "deals": 33,
+    "contacts": 33,
+    "companies": 0,
+    "fields": 318,
+    "tasks": 0,
+    "notes": 187,
+    "taskTypes": 8,
+    "meetings": 3,
+    "segments": 891,
+    "confirmedLinks": 0,
+    "settings": "a2dc2d84d37117d8",
+    "profile": "09b20a861506975e"
+  },
+  "crmSync": {
+    "ok": true,
+    "message": "ok"
+  },
+  "afterSync": {
+    "deals": 33,
+    "contacts": 33,
+    "companies": 0,
+    "fields": 318,
+    "tasks": 0,
+    "notes": 187,
+    "taskTypes": 8,
+    "meetings": 3,
+    "segments": 891,
+    "confirmedLinks": 0,
+    "settings": "a2dc2d84d37117d8",
+    "profile": "09b20a861506975e"
+  },
+  "workspaceRefresh": {
+    "ok": true,
+    "message": "Карточка обновлена из amoCRM.",
+    "dealsInClient": 1,
+    "clientHasCompany": false
+  },
+  "history": {
+    "events": 2,
+    "loadedAt": "2026-10-05T08:14:03.103Z",
+    "error": null,
+    "eventTypes": {
+      "entity_responsible_changed": 2
+    }
+  },
+  "kontur": {
+    "connect": true,
+    "sync": true,
+    "message": "ok",
+    "meetingIdsStable": true
+  },
+  "afterKontur": {
+    "deals": 33,
+    "contacts": 33,
+    "companies": 0,
+    "fields": 318,
+    "tasks": 0,
+    "notes": 187,
+    "taskTypes": 8,
+    "meetings": 3,
+    "segments": 891,
+    "confirmedLinks": 0,
+    "settings": "a2dc2d84d37117d8",
+    "profile": "09b20a861506975e"
+  },
+  "operations": 0,
+  "http": "GET only",
+  "checkedAt": "2026-10-05T08:14:04.923Z"
+}

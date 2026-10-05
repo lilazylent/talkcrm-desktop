@@ -16,7 +16,7 @@ export const endpoint = (domain: string, relative: string): URL => {
 };
 const readPaths = [
   /^\/api\/v4\/(account|leads|contacts|companies|tasks)(\/\d+)?(\/links|\/notes|\/custom_fields)?$/,
-  /^\/api\/v4\/leads\/pipelines$/, /^\/api\/v4\/events$/, /^\/api\/v4\/(leads|contacts|companies)\/custom_fields\/groups$/,
+  /^\/api\/v4\/leads\/pipelines$/, /^\/api\/v4\/events$/, /^\/api\/v4\/talks(\/\d+)?$/, /^\/api\/v4\/(leads|contacts|companies)\/custom_fields\/groups$/,
   /^\/api\/v4\/(leads|contacts|companies)\/notes\/\d+$/
 ];
 // Mutation allowlist: updates and creation only. No DELETE, no schema, pipeline, user or account administration.

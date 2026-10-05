@@ -82,3 +82,27 @@ it('blocks remote mutations offline and keeps data viewable', async () => {
   expect((screen.getAllByRole('button', { name: 'Редактировать' })[0] as HTMLButtonElement).disabled).toBe(true);
   act(() => { window.dispatchEvent(new Event('online')); });
 });
+
+const talk = (talkId: number, origin: string, extra: Partial<import('../src/domain/crm.ts').CrmTalk> = {}): import('../src/domain/crm.ts').CrmTalk => ({ talkId, chatId: `c${talkId}`, contactId: 20, entityId: 10, entityType: 'lead', origin, sourceId: 1, status: 'in_work', isInWork: true, isRead: true, createdAt: 1700000000, updatedAt: 1700000000 + talkId, ...extra });
+it('shows an empty chat tab when the client has no conversations', async () => {
+  render(<App/>); await screen.findByRole('heading', { name: 'Ирина Без Компании', level: 1 });
+  fireEvent.click(screen.getByRole('tab', { name: 'Чат' })); expect(await screen.findByText('Переписок с клиентом пока нет.')).toBeTruthy();
+  expect(screen.queryByRole('textbox', { name: /сообщени/i })).toBeNull();
+});
+it('lists several channels separately, marks unread and opens the official amoCRM card', async () => {
+  const openInAmo = vi.fn(async () => ({ ok: true, message: 'ok' })); window.talkcrm!.openInAmo = openInAmo;
+  data.crm!.talks = [talk(1, 'whatsapp', { isRead: false, sourceId: 11 }), talk(2, 'whatsapp', { sourceId: 12 }), talk(3, 'telegram', { entityId: null, entityType: null }), talk(4, 'com.custom.origin_23', { contactId: 999 })];
+  render(<App/>); await screen.findByRole('heading', { name: 'Ирина Без Компании', level: 1 });
+  fireEvent.click(screen.getByRole('tab', { name: 'Чат' }));
+  expect(await screen.findByText('WhatsApp · источник 1')).toBeTruthy(); expect(screen.getByText('WhatsApp · источник 2')).toBeTruthy(); expect(screen.getByText('Telegram')).toBeTruthy();
+  expect(screen.queryByText('Другой канал', { selector: 'strong' })).toBeNull(); expect(screen.getAllByText('Непрочитано')).toHaveLength(1);
+  const rows = screen.getAllByRole('button', { name: 'Открыть в amoCRM' }); fireEvent.click(rows[0]); await waitFor(() => expect(openInAmo).toHaveBeenCalledWith('contact', 20));
+  fireEvent.click(rows[2]); await waitFor(() => expect(openInAmo).toHaveBeenLastCalledWith('lead', 10));
+  expect(write).not.toHaveBeenCalled();
+});
+it('filters the messages inbox by unread and shows unknown channels neutrally', async () => {
+  data.crm!.talks = [talk(1, 'telegram', { isRead: false }), talk(2, 'com.custom.origin_23')];
+  window.location.hash = '#/messages'; render(<App/>); await screen.findByRole('heading', { name: 'Сообщения' });
+  expect(screen.getByText('Другой канал', { selector: 'strong' })).toBeTruthy(); fireEvent.click(screen.getByRole('button', { name: 'Непрочитанные' }));
+  expect(screen.queryByText('Другой канал', { selector: 'strong' })).toBeNull(); expect(screen.getByText('Telegram', { selector: 'strong' })).toBeTruthy();
+});

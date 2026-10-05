@@ -131,3 +131,20 @@
 .detail-side .task-row .grow{flex:1 1 calc(100% - 80px)}
 .detail-side .task-row small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-side .task-row .date-note{margin-left:36px}
+
+/* conversations (Phase 6) */
+.talk-list{display:flex;flex-direction:column}
+.talk-row{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-3) var(--s-5);border-top:1px solid var(--line-soft)}
+.talk-list>.talk-row:first-child,.talk-list>.inbox-item:first-child .talk-row{border-top:0}
+.talk-list.compact .talk-row{padding:0;flex-wrap:wrap}
+.talk-row.unread{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+.talk-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--s-2)}
+.talk-head strong{font-size:var(--fs-body)}
+.talk-client{margin-right:var(--s-2)}
+.talk-row .meta{display:block;margin-top:2px;font-size:var(--fs-meta);color:var(--text-3)}
+.channel-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;flex:none;background:var(--surface-3);color:var(--text-2)}
+.ch-WhatsApp{background:#e7f8ee;color:#128c4a}.ch-Telegram{background:#e6f3fc;color:#1b8ad0}.ch-Viber{background:#f1eafd;color:#7a4fd6}.ch-ВКонтакте{background:#e8f0fb;color:#2f6fd0}.ch-Авито{background:#eaf6fe;color:#0a8ad8}
+.inbox-item{position:relative;border-top:1px solid var(--line-soft)}
+.inbox-item:first-child{border-top:0}
+.inbox-item .talk-row{border-top:0;padding-bottom:var(--s-2)}
+.inbox-link{display:inline-flex;margin:0 0 var(--s-3) calc(var(--s-5) + 38px + var(--s-3));font-size:var(--fs-meta)}

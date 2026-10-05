@@ -87,7 +87,7 @@ export class SqliteRepository implements AppRepository {
     const account = this.getCrmAccount(); const crm = crmSnapshot(db,account);
     const real = settings.data_mode === 'amocrm';
     const kontur=this.getKonturAccount();
-    return { profile, clients: real ? crm.clients : kontur?[]:clients, deals: real ? crm.deals : kontur?[]:deals, meetings: kontur?konturMeetings(db,kontur):real?[]:meetings.filter(m=>!m.source||m.source==='demo'), tasks: real ? crm.tasks : kontur?[]:tasks, integrations, settings, templates, crm: {account,contacts:crm.contacts,companies:crm.companies,pipelines:crm.pipelines,notes:crm.notes,fields:crm.fields,leads:crm.leads,relations:crm.relations,taskTypes:crm.taskTypes,contactNotes:crm.contactNotes,companyNotes:crm.companyNotes,fieldGroups:crm.fieldGroups,editableNotes:crm.editableNotes},kontur, version: this.version, databaseLocation: this.filePath };
+    return { profile, clients: real ? crm.clients : kontur?[]:clients, deals: real ? crm.deals : kontur?[]:deals, meetings: kontur?konturMeetings(db,kontur):real?[]:meetings.filter(m=>!m.source||m.source==='demo'), tasks: real ? crm.tasks : kontur?[]:tasks, integrations, settings, templates, crm: {account,contacts:crm.contacts,companies:crm.companies,pipelines:crm.pipelines,notes:crm.notes,fields:crm.fields,leads:crm.leads,relations:crm.relations,taskTypes:crm.taskTypes,contactNotes:crm.contactNotes,companyNotes:crm.companyNotes,fieldGroups:crm.fieldGroups,editableNotes:crm.editableNotes,talks:crm.talks},kontur, version: this.version, databaseLocation: this.filePath };
   }
 
   async setTaskCompleted(id: string, completed: boolean): Promise<void> {

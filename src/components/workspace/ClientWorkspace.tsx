@@ -15,8 +15,10 @@ import { StageControl } from './StageControl.tsx';
 import { CompleteTaskModal, TaskForm, TaskGroups, TaskRow, type TaskTarget } from './Tasks.tsx';
 import { NoteComposer, TimelineFeed, type NoteTarget } from './Timeline.tsx';
 import { FieldDisplay } from './FieldEditor.tsx';
+import { ChatTab, TalkRow, useOpenInAmo } from './Conversations.tsx';
+import { talksForContacts } from '../../domain/talks.ts';
 
-type Tab = 'overview'|'history'|'tasks'|'meetings';
+type Tab = 'overview'|'chat'|'history'|'tasks'|'meetings';
 const STALE_MS = 10 * 60 * 1000;
 const clientTitle = (c: Client) => c.companyName || c.name;
 /** Only confirmed Phase 4 links (or linked demo meetings) count as client history. */
@@ -26,7 +28,7 @@ export function ClientWorkspace() {
   const { id } = useParams(); const [params, setParams] = useSearchParams(); const navigate = useNavigate();
   const { data, api, reload, canWrite, writeBlock, guard } = useApp();
   const client = data.clients.find(c => c.id === id);
-  const [tab, setTab] = useState<Tab>('overview'); const [timeline, setTimeline] = useState<TimelineData>({ events: [], loadedAt: null, error: null });
+  const [tab, setTab] = useState<Tab>(() => params.get('tab') === 'chat' ? 'chat' : 'overview'); const [timeline, setTimeline] = useState<TimelineData>({ events: [], loadedAt: null, error: null });
   const [refreshing, setRefreshing] = useState(false); const [refreshNote, setRefreshNote] = useState<string | null>(null);
   const [taskForm, setTaskForm] = useState<{ task?: Task } | null>(null); const [completing, setCompleting] = useState<Task | null>(null); const [noteForm, setNoteForm] = useState<{ id?: number; text?: string; target?: NoteTarget } | null>(null);
   const crm = data.crm; const real = data.settings.data_mode === 'amocrm' && !!crm?.account;
@@ -36,6 +38,8 @@ export function ClientWorkspace() {
   const contact = real && client?.primaryContactId ? crm!.contacts.find(c => c.id === client.primaryContactId) : undefined;
   const company = real && client?.companyId ? crm!.companies.find(c => c.id === client.companyId) : undefined;
   const tasks = data.tasks.filter(t => t.clientId === id);
+  const talks = talksForContacts(crm?.talks, client?.primaryContactId ? [client.primaryContactId] : []);
+  const amo = useOpenInAmo();
   const meetings = client ? confirmedFor(data.meetings, client.id) : [];
   const loadTimeline = useCallback(async () => { if (!id) return; try { setTimeline(await api.getTimeline(id)); } catch { /* cache stays as is */ } }, [api, id]);
   const refresh = useCallback(async () => {
@@ -62,7 +66,7 @@ export function ClientWorkspace() {
   const contextOf = (t: Task) => t.dealId ? (deals.length > 1 ? data.deals.find(d => d.id === t.dealId)?.title : undefined) : t.entityType === 'contacts' ? 'Контакт' : undefined;
   const selectDeal = (d: Deal) => guard(() => setParams({ deal: d.id }, { replace: true }));
   const editNote = (item: TimelineItem) => item.noteId && item.entity && item.entityId && setNoteForm({ id: item.noteId, text: item.text ?? '', target: { entity: item.entity, entityId: item.entityId, label: item.entity === 'leads' ? deals.find(d => Number(d.externalId) === item.entityId)?.title ?? 'Сделка' : String(contact?.name ?? company?.name ?? '') } });
-  const tabs: { key: Tab; label: string; count?: number }[] = [{ key: 'overview', label: 'Обзор' }, { key: 'history', label: 'История' }, { key: 'tasks', label: 'Задачи', count: openTasks }, { key: 'meetings', label: 'Встречи', count: meetings.length }];
+  const tabs: { key: Tab; label: string; count?: number }[] = [{ key: 'overview', label: 'Обзор' }, ...(real ? [{ key: 'chat' as Tab, label: 'Чат', count: talks.filter(t => !t.isRead).length }] : []), { key: 'history', label: 'История' }, { key: 'tasks', label: 'Задачи', count: openTasks }, { key: 'meetings', label: 'Встречи', count: meetings.length }];
   const accountName = crm?.account ? `Пользователь #${crm.account.currentUserId}` : client.responsibleName;
 
   return <div className="workspace">
@@ -99,10 +103,12 @@ export function ClientWorkspace() {
       {company && <EntityCard key={`company-${company.id}`} entity="companies" record={company} title="Компания" icon={Building2} primaryCodes={['PHONE', 'EMAIL']} onRefresh={refresh}/>}
     </div><aside className="detail-side">
       <ImportantFields lead={lead}/>
+      {real && talks[0] && <Section title="Последняя переписка" icon={MessageSquareText} action={<button className="link-btn" onClick={() => setTab('chat')}>Все переписки</button>}><div className="talk-list compact"><TalkRow talk={talks[0]} all={talks} deal={deals.find(d => talks[0].entityType === 'lead' && Number(d.externalId) === talks[0].entityId)} onOpen={() => { const t = talks[0]; const d = deals.find(x => t.entityType === 'lead' && Number(x.externalId) === t.entityId); if (d) void amo.open('lead', Number(d.externalId)); else if (t.contactId) void amo.open('contact', t.contactId); }}/></div></Section>}
       <Section title="Последняя встреча" icon={CalendarDays}>{lastMeeting ? <div className="meeting-feature"><div className="feature-meta"><span><CalendarDays size={15}/>{formatDate(lastMeeting.startedAt)}</span><span><Clock3 size={15}/>{formatDuration(lastMeeting.durationSeconds)}</span></div><h3>{lastMeeting.title}</h3>{(lastMeeting.sourceSummaryPreview ?? lastMeeting.summary) && <p>{lastMeeting.sourceSummaryPreview ?? lastMeeting.summary}</p>}<Link className="btn btn-primary" to={`/meetings/${lastMeeting.id}`}>Открыть встречу <ArrowUpRight size={16}/></Link></div> : <EmptyState compact icon={CalendarDays} title="Подтверждённых встреч пока нет." detail="Свяжите встречу с клиентом на странице встречи."/>}</Section>
       <Section title="Ближайшие задачи" icon={ListTodo} flush action={<button className="link-btn" onClick={() => setTab('tasks')}>Все</button>}>{tasks.filter(t => !t.completed).length ? <div className="task-list">{tasks.filter(t => !t.completed).sort((a, b) => (a.dueAt ?? '9999').localeCompare(b.dueAt ?? '9999')).slice(0, 3).map(t => <TaskRow key={t.id} task={t} context={contextOf(t)} onEdit={task => setTaskForm({ task })} onComplete={setCompleting}/>)}</div> : <EmptyState compact icon={ListTodo} title="У клиента пока нет задач."/>}</Section>
       <Section title="Последние действия" icon={MessageSquareText} action={<button className="link-btn" onClick={() => setTab('history')}>Вся история</button>}><TimelineFeed compact items={items} limit={5} loading={refreshing && !timeline.loadedAt} dealLabel={dealLabel} onEditNote={editNote}/></Section>
     </aside></div>}
+    {tab === 'chat' && <ChatTab talks={talks} deals={deals} contactId={client.primaryContactId ?? null}/>}
     {tab === 'history' && <div className="panel ws-panel"><TimelineFeed items={items} loading={refreshing} error={timeline.error} loadedAt={timeline.loadedAt} onRefresh={real ? () => void refresh() : undefined} dealLabel={dealLabel} onEditNote={editNote}/></div>}
     {tab === 'tasks' && <TaskGroups tasks={tasks} contextOf={contextOf} onAdd={real ? () => setTaskForm({}) : undefined} onEdit={task => setTaskForm({ task })} onComplete={setCompleting} emptyText="У клиента пока нет задач."/>}
     {tab === 'meetings' && <MeetingsTab meetings={meetings} deals={deals}/>}

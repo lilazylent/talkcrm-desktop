@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BriefcaseBusiness, CalendarDays, CornerDownLeft, FileText, LayoutDashboard, ListTodo, Search, Settings, Users, type LucideIcon } from 'lucide-react';
+import { BriefcaseBusiness, CalendarDays, CornerDownLeft, FileText, LayoutDashboard, ListTodo, MessagesSquare, Search, Settings, Users, type LucideIcon } from 'lucide-react';
 import type { AppSnapshot } from '../domain/models.ts';
 import { formatMoney } from '../domain/models.ts';
 
@@ -13,7 +13,7 @@ export function CommandPalette({ data, onClose }: { data: AppSnapshot; onClose: 
   useEffect(() => { input.current?.focus(); }, []);
   const items = useMemo<Item[]>(() => {
     const client = (id: string | null) => data.clients.find(c => c.id === id);
-    const pages: Item[] = [['/', 'Главная', LayoutDashboard], ['/meetings', 'Встречи', CalendarDays], ['/clients', 'Клиенты', Users], ['/deals', 'Сделки', BriefcaseBusiness], ['/tasks', 'Задачи', ListTodo], ['/templates', 'Шаблоны', FileText], ['/settings', 'Настройки', Settings]].map(([to, title, icon]) => ({ id: 'page:' + to, group: 'Разделы', title: title as string, icon: icon as LucideIcon, to: to as string, haystack: fold(title as string) }));
+    const pages: Item[] = [['/', 'Главная', LayoutDashboard], ['/meetings', 'Встречи', CalendarDays], ['/messages', 'Сообщения', MessagesSquare], ['/clients', 'Клиенты', Users], ['/deals', 'Сделки', BriefcaseBusiness], ['/tasks', 'Задачи', ListTodo], ['/templates', 'Шаблоны', FileText], ['/settings', 'Настройки', Settings]].map(([to, title, icon]) => ({ id: 'page:' + to, group: 'Разделы', title: title as string, icon: icon as LucideIcon, to: to as string, haystack: fold(title as string) }));
     return [...pages,
       ...data.meetings.map(m => ({ id: 'm:' + m.id, group: 'Встречи', title: m.title, detail: [m.crmLink?.confirmed?.clientLabel ?? client(m.clientId)?.companyName, m.participants.slice(0, 3).join(', ')].filter(Boolean).join(' · '), icon: CalendarDays, tone: 'accent', to: `/meetings/${m.id}`, haystack: fold(`${m.title} ${m.participants.join(' ')}`) })),
       ...data.clients.map(c => ({ id: 'c:' + c.id, group: 'Клиенты', title: c.companyName || c.name, detail: [c.name, c.phone, c.email].filter(Boolean).join(' · '), icon: Users, tone: 'info', to: `/clients/${c.id}`, haystack: fold(`${c.companyName ?? ''} ${c.name} ${c.email ?? ''} ${c.phone ?? ''}`) })),

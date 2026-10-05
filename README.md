@@ -1,6 +1,6 @@
 # TalkCRM Desktop
 
-TalkCRM Desktop 0.5.0 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
+TalkCRM Desktop 0.6.0 is a local Windows workspace on Electron, React, TypeScript and SQLite. Phase 3 adds Kontur.Talk through an isolated employee session (including Yandex sign-in) or an administrator-issued official API key. Internal meetings work without client matching. The employee session was verified on four recordings: three meetings, 891 transcript segments and four retellings. Protocols were unavailable at the source. Live official API key validation remains pending.
 
 Phase 5 (0.5.0) turns the client card into the manager's workspace with safe amoCRM write-back: edit deals (name, budget, stage, custom fields), contacts and companies, create/edit/reschedule/complete tasks, add notes, and see a unified history. amoCRM stays the system of record: every change is validated, sent with only the changed fields, confirmed by amoCRM and reconciled into the cache. Real and demo data are separate. Phase 4 meeting/client/deal proposals still require human confirmation. AI generation, chats and telephony remain later work.
 
@@ -51,6 +51,10 @@ Meetings have five tabs, exact source speakers/timestamps, local Cyrillic text s
 ## Client workspace and amoCRM write-back
 
 Open any client. The header shows contact, phone, email, responsible, deals and quick actions **Добавить задачу** / **Добавить примечание**. Tabs: Обзор, История, Задачи, Встречи. Cards switch to edit mode with **Редактировать**; only changed fields are sent; concurrent amoCRM edits are detected instead of overwritten. Closing a deal requires confirmation. Offline, everything is read-only and nothing is queued. See [CRM workspace](docs/CRM_WORKSPACE.md) and [write safety rules](docs/AMOCRM_WRITE_SAFETY.md). Migration 006 adds the write audit (`crm_operations`), cached history events and field groups without touching existing data.
+
+## Client conversations (0.6.0)
+
+The client workspace has a **Чат** tab and the sidebar a **Сообщения** inbox: conversations of your clients discovered through the official amoCRM Talks API (channel, status, unread, linked deal). Message text and replies stay in amoCRM — **Открыть в amoCRM** opens the right card. Notes, tasks and history stay separate. See [messaging architecture](docs/MESSAGING_ARCHITECTURE.md). Migration 007 adds `crm_talks`.
 
 ## Meeting ↔ CRM matching
 

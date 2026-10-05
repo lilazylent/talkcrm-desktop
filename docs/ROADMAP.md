@@ -37,9 +37,13 @@ Executable Windows workspace, SQLite migrations, Russian demo UI, local task/pro
 - Unified timeline from amoCRM events, notes, tasks and confirmed Kontur meetings.
 - Write lifecycle with audit (`crm_operations`), duplicate suppression, conflict detection, post-write reconciliation, no offline queue; migration 006.
 
-## Phase 6+ — not started
+## Phase 6 — client conversations via official Talks API (0.6.0)
 
-- Unified customer chats in the client workspace (tab reserved, not implemented).
+- Чат tab and Сообщения inbox from `GET /api/v4/talks`: channels, status, unread, linked deal; Открыть в amoCRM for reading and replying.
+- Message bodies and sending inside TalkCRM require an owned Chats API channel or direct messenger integration (future).
+
+## Phase 7+ — not started
+
 - Telephony and calls.
 - Meeting templates and AI extraction producing proposed `CrmCommand`s that the user approves through the same write path.
 

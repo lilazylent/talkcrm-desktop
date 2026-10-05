@@ -21,6 +21,7 @@ const api: DesktopApi = {
   writeCrm: command=>ipcRenderer.invoke('crm:write',command),
   refreshWorkspace: clientId=>ipcRenderer.invoke('crm:refreshWorkspace',clientId),
   getTimeline: clientId=>ipcRenderer.invoke('crm:timeline',clientId),
+  openInAmo: (kind,id)=>ipcRenderer.invoke('crm:openInAmo',kind,id),
   openKontur:domain=>ipcRenderer.invoke('kontur:open',domain),
   connectKontur:input=>ipcRenderer.invoke('kontur:connect',input),
   syncKontur:()=>ipcRenderer.invoke('kontur:sync'),

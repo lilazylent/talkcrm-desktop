@@ -82,6 +82,8 @@ app.whenReady().then(async () => {
   safeHandle('crm:write', command=>crm.execute(command));
   safeHandle('crm:refreshWorkspace', clientId=>crm.refreshWorkspace(clientId));
   safeHandle('crm:timeline', async clientId=>crm.timeline(clientId));
+  // Opens the official amoCRM card (where messages are read and sent) for an entity present in the local cache.
+  safeHandle('crm:openInAmo', async (kind:unknown,id:unknown)=>{const account=repository.getCrmAccount();if(!account||(kind!=='lead'&&kind!=='contact')||typeof id!=='number'||!Number.isSafeInteger(id)||id<=0||!repository.cachedEntity(kind,id))return{ok:false,message:'Запись недоступна.'};await shell.openExternal(`https://${account.domain}/${kind==='lead'?'leads':'contacts'}/detail/${id}`);return{ok:true,message:'Открыто в amoCRM.'};});
   safeHandle('kontur:open',domain=>kontur.open(domain));
   safeHandle('kontur:connect',(input:import('../src/domain/kontur.ts').KonturConnectInput)=>kontur.connect(input));
   safeHandle('kontur:sync',()=>kontur.sync());

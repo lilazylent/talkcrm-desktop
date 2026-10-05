@@ -284,7 +284,7 @@ describe('migration from 0.4.0', () => {
     repo = new SqliteRepository(legacyFile, path.join(process.cwd(), 'migrations'), process.cwd()); await repo.initialize();
     const rowsAfter = dump(legacyFile); for (const t of tables) expect(rowsAfter[t]).toBe(rowsBefore[t]);
     const after = await repo.snapshot(); expect(after.deals).toEqual(before.deals); expect(after.crm?.notes).toEqual(before.crm?.notes);
-    const db = new SQL.Database(fs.readFileSync(legacyFile)); expect(db.exec('SELECT MAX(version) FROM schema_migrations')[0].values[0][0]).toBe(6);
+    const db = new SQL.Database(fs.readFileSync(legacyFile)); expect(db.exec('SELECT MAX(version) FROM schema_migrations')[0].values[0][0]).toBe(7);
     expect(db.exec("SELECT name FROM sqlite_master WHERE name IN ('crm_operations','crm_events','crm_event_loads','crm_field_groups') ORDER BY name")[0].values.flat()).toEqual(['crm_event_loads', 'crm_events', 'crm_field_groups', 'crm_operations']); db.close();
   });
 });

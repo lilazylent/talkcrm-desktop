@@ -1,4 +1,4 @@
-import type { CrmAccount, CrmRecord, CrmRelation, SyncBatch, SyncProgress } from '../../src/domain/crm.ts';
+import type { CrmAccount, CrmRecord, CrmRelation, CrmTalk, SyncBatch, SyncProgress } from '../../src/domain/crm.ts';
 import { AmoClient } from './client.ts';
 import { CrmError, positiveId, record, safeMessage } from './security.ts';
 export async function collectSync(client: AmoClient, previous: CrmAccount, progress: (p: SyncProgress)=>void): Promise<SyncBatch> {
@@ -37,5 +37,28 @@ export async function collectSync(client: AmoClient, previous: CrmAccount, progr
   await optional('Загружаем примечания контактов',async()=>{const notes:CrmRecord[]=[];for(const [index,contact] of contacts.entries()){report('Загружаем примечания контактов',index+1,contacts.length);for(const note of await client.all(`/api/v4/contacts/${contact.id}/notes`,'notes'))notes.push({...note,entity_id:contact.id,entity_type:'contacts'});}batch.contactNotes=notes;const companyNotes:CrmRecord[]=[];for(const company of companies)for(const note of await client.all(`/api/v4/companies/${company.id}/notes`,'notes'))companyNotes.push({...note,entity_id:company.id,entity_type:'companies'});batch.companyNotes=companyNotes;});
   await optional('Загружаем типы задач',async()=>{const account=await client.get('/api/v4/account?with=task_types');const embedded=account._embedded?record(account._embedded):{};batch.taskTypes=Array.isArray(embedded.task_types)?embedded.task_types.map(t=>record(t) as CrmRecord).filter(t=>typeof t.id==='number'&&t.id>0):[];});
   await optional('Загружаем группы полей',async()=>{const groups:NonNullable<SyncBatch['fieldGroups']>=[];for(const entity of ['leads','contacts','companies'])for(const g of await client.list(`/api/v4/${entity}/custom_fields/groups`,'custom_field_groups',{limit:'50'},5))if(typeof g.id==='string'&&typeof g.name==='string')groups.push({entity,id:g.id,name:g.name,sort:typeof g.sort==='number'?g.sort:0});batch.fieldGroups=groups;});
+  await optional('Загружаем переписки',async()=>{batch.talks=await collectTalks(client,contacts.map(c=>c.id),count=>report('Загружаем переписки',count));});
   report('Сохраняем кэш'); return batch;
+}
+
+const optionalInt=(v:unknown):number|null=>typeof v==='number'&&Number.isSafeInteger(v)&&v>0?v:null;
+/** Validates one Talks API item. Unknown origins are kept as-is; message bodies are not part of this API. */
+export function mapTalk(value:unknown):CrmTalk{
+  const t=record(value);const talkId=positiveId(t.talk_id??t.id);
+  return{talkId,chatId:typeof t.chat_id==='string'?t.chat_id:null,contactId:optionalInt(t.contact_id),entityId:optionalInt(t.entity_id),entityType:typeof t.entity_type==='string'?t.entity_type:null,origin:typeof t.origin==='string'&&t.origin.length<=100?t.origin:null,sourceId:optionalInt(t.source_id),status:typeof t.status==='string'?t.status:null,isInWork:t.is_in_work===true,isRead:t.is_read!==false,createdAt:optionalInt(t.created_at),updatedAt:optionalInt(t.updated_at)};
+}
+/** Official GET /api/v4/talks filtered by the synchronized contacts (50 ids per request, paginated). */
+export async function collectTalks(client:AmoClient,contactIds:number[],progress:(count:number)=>void=()=>{}):Promise<CrmTalk[]>{
+  const talks=new Map<number,CrmTalk>();
+  for(let offset=0;offset<contactIds.length;offset+=50){
+    const part=contactIds.slice(offset,offset+50);
+    for(let page=1;page<=40;page++){
+      const query=new URLSearchParams({limit:'250',page:String(page)});part.forEach((id,i)=>query.set(`filter[contact_id][${i}]`,String(id)));
+      const dto=await client.get(`/api/v4/talks?${query}`);const embedded=dto._embedded?record(dto._embedded):{};const items=embedded.talks??[];
+      if(!Array.isArray(items))throw new CrmError('format','Некорректный список переписок amoCRM.');
+      let fresh=0;for(const item of items){const talk=mapTalk(item);if(talk.contactId!==null&&!part.includes(talk.contactId))continue;if(!talks.has(talk.talkId)){talks.set(talk.talkId,talk);fresh++;}}
+      progress(talks.size);const links=dto._links?record(dto._links):{};if(!links.next||!fresh)break;
+    }
+  }
+  return[...talks.values()];
 }
